@@ -17,8 +17,14 @@ notification system as well as on the used icon.
 Installation
 ------------
 
-* Put the `notify_send.py` script to `$HOME/.weechat/python/`
-* In WeeChat, run `/script load notify_send.py`
+* Put the `notify_send.py` script to `~/.weechat/python/`
+* Add a symbolic link to it in the `~/.weechat/python/autoload/` directory
+  to make the script load automatically when WeeChat starts:
+
+```
+$ cd ~/.weechat/python/autoload
+$ ln -s ../notify_send.py
+```
 
 Settings
 --------
