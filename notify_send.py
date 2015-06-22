@@ -64,6 +64,8 @@ SCRIPT_CHARSET = ''
 
 # Script settings.
 SETTINGS = {
+    'escape_html': ('on',
+        "Escapes the '<', '>', and '&' characters in notification messages."),
     'icon': ('/usr/share/icons/hicolor/32x32/apps/weechat.png',
              'Path to an icon to be shown in notifications.'),
     'timeout': ('5000',
@@ -96,6 +98,9 @@ def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
 
 def send_notification(source, message):
     """Sends a notification to the user."""
+    if weechat.config_get_plugin('escape_html') == 'on':
+        message = escape_html(message)
+
     icon = weechat.config_get_plugin('icon')
     timeout = weechat.config_get_plugin('timeout')
     urgency = weechat.config_get_plugin('urgency')
@@ -110,6 +115,16 @@ def send_notification(source, message):
         message
     ]
     subprocess.check_call(notify_cmd)
+
+
+def escape_html(message):
+    """Escapes HTML characters in the given message."""
+    # Only the following characters need to be escaped
+    # (https://wiki.ubuntu.com/NotificationDevelopmentGuidelines).
+    message = message.replace('&', '&amp;')
+    message = message.replace('<', '&lt;')
+    message = message.replace('>', '&gt;')
+    return message
 
 
 if __name__ == '__main__':

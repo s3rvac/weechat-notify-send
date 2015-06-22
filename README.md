@@ -33,6 +33,8 @@ The plugin allows you to set the following settings (either by running `/set
 plugins.var.python.notify_send.XXX YYY` or by using the
 [iset.pl](https://weechat.org/scripts/source/iset.pl.html/) plugin.
 
+* `escape_html`: Escapes the `<`, `>`, and `&` HTML
+  characters in notification messages. Default: `on`.
 * `icon`: Path to an icon to be shown in notifications. Default:
   `/usr/share/icons/hicolor/32x32/apps/weechat.png`.
 * `timeout`: Time after which the notification disappears (in milliseconds).
