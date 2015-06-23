@@ -65,7 +65,8 @@ SCRIPT_CHARSET = ''
 # Script settings.
 SETTINGS = {
     'escape_html': ('on',
-        "Escapes the '<', '>', and '&' characters in notification messages."),
+                    "Escapes the '<', '>', and '&' characters "
+                    "in notification messages."),
     'icon': ('/usr/share/icons/hicolor/32x32/apps/weechat.png',
              'Path to an icon to be shown in notifications.'),
     'timeout': ('5000',
