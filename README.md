@@ -17,7 +17,9 @@ notification system as well as on the used icon.
 Installation
 ------------
 
-* Put the `notify_send.py` script to `~/.weechat/python/`
+* Put the
+  [`notify_send.py`](https://raw.githubusercontent.com/s3rvac/weechat-notify-send/master/notify_send.py)
+  script to `~/.weechat/python/`
 * Add a symbolic link to it in the `~/.weechat/python/autoload/` directory
   to make the script load automatically when WeeChat starts:
 
@@ -47,4 +49,6 @@ License
 
 Copyright (c) 2015 Petr Zemek (s3rvac@gmail.com) and contributors.
 
-Distributed under the MIT license. See the `LICENSE` file for more details.
+Distributed under the MIT license. See the
+[`LICENSE`](https://github.com/s3rvac/weechat-notify-send/blob/master/LICENSE)
+file for more details.
