@@ -38,3 +38,15 @@ except ImportError:
 # weechat. Moreover, it allows us to test the module properly.
 weechat = mock.Mock()
 sys.modules['weechat'] = weechat
+
+from notify_send import escape_html
+
+
+class EscapeHtmlTests(unittest.TestCase):
+    """Tests for escape_html()."""
+
+    def test_properly_escapes_needed_html_characters(self):
+        self.assertEqual(
+            escape_html('< > &'),
+            '&lt; &gt; &amp;'
+        )
