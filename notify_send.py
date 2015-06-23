@@ -77,28 +77,66 @@ SETTINGS = {
 }
 
 
+class Notification(object):
+    """A representation of a notification."""
+
+    def __init__(self, source, message, icon, timeout, urgency):
+        self.source = source
+        self.message = message
+        self.icon = icon
+        self.timeout = timeout
+        self.urgency = urgency
+
+
 def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
                     prefix, message):
     """A callback for notifications from WeeChat."""
-    # Private messages.
-    if weechat.buffer_get_string(buffer, 'localvar_type') == 'private':
-        # Do not send a notification to myself when I am the author of the
-        # message.
-        if weechat.buffer_get_string(buffer, 'localvar_nick') != prefix:
-            send_notification(prefix, message)
+    is_highlight = int(is_highlight)
 
-    # Highlights.
-    if int(is_highlight):
-        source = (weechat.buffer_get_string(buffer, 'short_name') or
-                  weechat.buffer_get_string(buffer, 'name'))
-        message = prefix + ': ' + message
-        send_notification(source, message)
+    if notification_should_be_sent(buffer, prefix, is_highlight):
+        notification = prepare_notification(
+            buffer, is_highlight, prefix, message
+        )
+        send_notification(notification)
 
     return weechat.WEECHAT_RC_OK
 
 
-def send_notification(source, message):
-    """Sends a notification to the user."""
+def notification_should_be_sent(buffer, prefix, is_highlight):
+    """Should a notification be sent?"""
+    if is_private_message(buffer):
+        if i_am_author_of_message(buffer, prefix):
+            # Do not send notifications from myself.
+            return False
+        return True
+
+    if is_highlight:
+        return True
+
+    # We send notifications only for private messages or hightlights.
+    return False
+
+
+def is_private_message(buffer):
+    """Has a private message been sent?"""
+    return weechat.buffer_get_string(buffer, 'localvar_type') == 'private'
+
+
+def i_am_author_of_message(buffer, prefix):
+    """Am I (the current WeeChat user) the author of the message?"""
+    return weechat.buffer_get_string(buffer, 'localvar_nick') == prefix
+
+
+def prepare_notification(buffer, is_highlight, prefix, message):
+    """Prepares a notification from the given data."""
+    if is_highlight:
+        source = (weechat.buffer_get_string(buffer, 'short_name') or
+                  weechat.buffer_get_string(buffer, 'name'))
+        message = prefix + ': ' + message
+    else:
+        # A private message.
+        source = prefix
+
     if weechat.config_get_plugin('escape_html') == 'on':
         message = escape_html(message)
 
@@ -106,16 +144,7 @@ def send_notification(source, message):
     timeout = weechat.config_get_plugin('timeout')
     urgency = weechat.config_get_plugin('urgency')
 
-    notify_cmd = [
-        'notify-send',
-        '-a', 'weechat',
-        '-i', icon,
-        '-t', timeout,
-        '-u', urgency,
-        source,
-        message
-    ]
-    subprocess.check_call(notify_cmd)
+    return Notification(source, message, icon, timeout, urgency)
 
 
 def escape_html(message):
@@ -126,6 +155,20 @@ def escape_html(message):
     message = message.replace('<', '&lt;')
     message = message.replace('>', '&gt;')
     return message
+
+
+def send_notification(notification):
+    """Sends the given notification to the user."""
+    notify_cmd = [
+        'notify-send',
+        '-a', 'weechat',
+        '-i', notification.icon,
+        '-t', notification.timeout,
+        '-u', notification.urgency,
+        notification.source,
+        notification.message
+    ]
+    subprocess.check_call(notify_cmd)
 
 
 if __name__ == '__main__':
