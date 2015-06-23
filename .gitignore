@@ -1,0 +1,7 @@
+# Python
+__pycache__
+*.py[co]
+
+# Unit tests and coverage reports
+/.coverage
+/coverage
