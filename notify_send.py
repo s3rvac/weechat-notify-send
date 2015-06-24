@@ -68,7 +68,7 @@ SETTINGS = {
                     "Escapes the '<', '>', and '&' characters "
                     "in notification messages."),
     'max_length': ('72',
-                   'Maximal length of a notification (0 means no limit.'),
+                   'Maximal length of a notification (0 means no limit).'),
     'ellipsis': ('[..]',
                  'Ellipsis to be used for notifications that are too '
                  'long.'),
