@@ -37,6 +37,10 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML
   characters in notification messages. Default: `on`.
+* `max_length`: Maximal length of a notification (0 means no limit). Default:
+  72.
+* `ellipsis`: Ellipsis to be used for notifications that are too long. Default:
+  `'[..]'`.
 * `icon`: Path to an icon to be shown in notifications. Default:
   `/usr/share/icons/hicolor/32x32/apps/weechat.png`.
 * `timeout`: Time after which the notification disappears (in milliseconds).

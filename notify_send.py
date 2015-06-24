@@ -67,6 +67,11 @@ SETTINGS = {
     'escape_html': ('on',
                     "Escapes the '<', '>', and '&' characters "
                     "in notification messages."),
+    'max_length': ('72',
+                   'Maximal length of a notification (0 means no limit.'),
+    'ellipsis': ('[..]',
+                 'Ellipsis to be used for notifications that are too '
+                 'long.'),
     'icon': ('/usr/share/icons/hicolor/32x32/apps/weechat.png',
              'Path to an icon to be shown in notifications.'),
     'timeout': ('5000',
@@ -137,6 +142,11 @@ def prepare_notification(buffer, is_highlight, prefix, message):
         # A private message.
         source = prefix
 
+    max_length = int(weechat.config_get_plugin('max_length'))
+    if max_length > 0:
+        ellipsis = weechat.config_get_plugin('ellipsis')
+        message = shorten_message(message, max_length, ellipsis)
+
     if weechat.config_get_plugin('escape_html') == 'on':
         message = escape_html(message)
 
@@ -145,6 +155,21 @@ def prepare_notification(buffer, is_highlight, prefix, message):
     urgency = weechat.config_get_plugin('urgency')
 
     return Notification(source, message, icon, timeout, urgency)
+
+
+def shorten_message(message, max_length, ellipsis):
+    """Shortens the message to at most max_length characters by using the given
+    ellipsis.
+    """
+    if max_length <= 0 or len(message) <= max_length:
+        # Nothing to shorten.
+        return message
+
+    if len(ellipsis) >= max_length:
+        # We cannot include any part of the message.
+        return ellipsis[:max_length]
+
+    return message[:max_length - len(ellipsis)] + ellipsis
 
 
 def escape_html(message):

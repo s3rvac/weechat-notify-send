@@ -40,6 +40,7 @@ weechat = mock.Mock()
 sys.modules['weechat'] = weechat
 
 from notify_send import escape_html
+from notify_send import shorten_message
 
 
 class EscapeHtmlTests(unittest.TestCase):
@@ -49,4 +50,42 @@ class EscapeHtmlTests(unittest.TestCase):
         self.assertEqual(
             escape_html('< > &'),
             '&lt; &gt; &amp;'
+        )
+
+
+class ShortenMessageTests(unittest.TestCase):
+    """Tests for shorten_message()."""
+
+    def test_returns_complete_message_when_max_length_is_zero(self):
+        message = 'abcde'
+        self.assertEqual(
+            shorten_message(message, max_length=0, ellipsis='[..]'),
+            message
+        )
+
+    def test_returns_complete_message_if_its_length_is_max_length(self):
+        message = 'abcde'
+        self.assertEqual(
+            shorten_message(message, max_length=len(message), ellipsis='[..]'),
+            message
+        )
+
+    def test_returns_just_ellipsis_when_max_length_is_length_of_ellipsis(self):
+        message = 'abcde'
+        ellipsis = '[..]'
+        self.assertEqual(
+            shorten_message(message, len(ellipsis), ellipsis),
+            ellipsis
+        )
+
+    def test_returns_shorter_message_when_it_is_longer_than_max_length(self):
+        self.assertEqual(
+            shorten_message('abcdef', max_length=5, ellipsis='[..]'),
+            'a[..]'
+        )
+
+    def test_returns_part_of_ellipsis_when_ellipsis_is_too_long(self):
+        self.assertEqual(
+            shorten_message('abcdef', max_length=3, ellipsis='[..]'),
+            '[..'
         )
