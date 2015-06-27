@@ -19,7 +19,6 @@ clean:
 	@find . -name '__pycache__' -exec rm -rf {} +
 	@find . -name '*.py[co]' -exec rm -f {} +
 	@rm -rf .coverage coverage
-	@rm -rf .tox retdec_python.egg-info
 
 lint:
 	@flake8 --ignore=E402,E501 notify_send.py notify_send_tests.py
