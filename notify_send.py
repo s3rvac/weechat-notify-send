@@ -184,15 +184,14 @@ def escape_html(message):
 
 def send_notification(notification):
     """Sends the given notification to the user."""
-    notify_cmd = [
-        'notify-send',
-        '--app-name', 'weechat',
-        '--icon', notification.icon,
-        '--expire-time', str(notification.timeout),
-        '--urgency', notification.urgency,
-        notification.source,
-        notification.message
-    ]
+    notify_cmd = ['notify-send', '--app-name', 'weechat']
+    if notification.icon:
+        notify_cmd += ['--icon', notification.icon]
+    if notification.timeout:
+        notify_cmd += ['--expire-time', str(notification.timeout)]
+    if notification.urgency:
+        notify_cmd += ['--urgency', notification.urgency]
+    notify_cmd += [notification.source, notification.message]
     subprocess.check_call(notify_cmd)
 
 

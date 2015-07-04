@@ -127,3 +127,27 @@ class SendNotificationTests(unittest.TestCase):
             'source',
             'message'
         ])
+
+    def test_does_not_include_icon_in_command_when_icon_is_not_set(self):
+        notification = new_notification(icon='')
+
+        send_notification(notification)
+
+        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        self.assertNotIn('--icon', notify_cmd)
+
+    def test_does_not_include_expire_time_in_command_when_timeout_is_not_set(self):
+        notification = new_notification(timeout='')
+
+        send_notification(notification)
+
+        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        self.assertNotIn('--expire-time', notify_cmd)
+
+    def test_does_not_include_urgency_in_command_when_urgency_is_not_set(self):
+        notification = new_notification(urgency='')
+
+        send_notification(notification)
+
+        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        self.assertNotIn('--urgency', notify_cmd)
