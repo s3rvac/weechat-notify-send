@@ -122,7 +122,7 @@ class SendNotificationTests(unittest.TestCase):
             'notify-send',
             '--app-name', 'weechat',
             '--icon', 'icon.png',
-            '--expire-time', 5000,
+            '--expire-time', '5000',
             '--urgency', 'normal',
             'source',
             'message'

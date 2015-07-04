@@ -188,7 +188,7 @@ def send_notification(notification):
         'notify-send',
         '--app-name', 'weechat',
         '--icon', notification.icon,
-        '--expire-time', notification.timeout,
+        '--expire-time', str(notification.timeout),
         '--urgency', notification.urgency,
         notification.source,
         notification.message
