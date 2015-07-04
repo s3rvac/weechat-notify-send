@@ -39,8 +39,15 @@ except ImportError:
 weechat = mock.Mock()
 sys.modules['weechat'] = weechat
 
+from notify_send import Notification
 from notify_send import escape_html
+from notify_send import send_notification
 from notify_send import shorten_message
+
+
+def new_notification(source='source', message='message', icon='icon.png',
+                     timeout=5000, urgency='normal'):
+    return Notification(source, message, icon, timeout, urgency)
 
 
 class EscapeHtmlTests(unittest.TestCase):
@@ -89,3 +96,34 @@ class ShortenMessageTests(unittest.TestCase):
             shorten_message('abcdef', max_length=3, ellipsis='[..]'),
             '[..'
         )
+
+
+class SendNotificationTests(unittest.TestCase):
+    """Tests for send_notification()."""
+
+    def setUp(self):
+        # Mock subprocess.
+        patcher = mock.patch('notify_send.subprocess')
+        self.subprocess = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_calls_correct_command_when_all_notification_parameters_are_set(self):
+        notification = new_notification(
+            source='source',
+            message='message',
+            icon='icon.png',
+            timeout=5000,
+            urgency='normal'
+        )
+
+        send_notification(notification)
+
+        self.subprocess.check_call.assert_called_once_with([
+            'notify-send',
+            '-a', 'weechat',
+            '-i', 'icon.png',
+            '-t', 5000,
+            '-u', 'normal',
+            'source',
+            'message'
+        ])
