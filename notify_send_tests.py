@@ -120,10 +120,10 @@ class SendNotificationTests(unittest.TestCase):
 
         self.subprocess.check_call.assert_called_once_with([
             'notify-send',
-            '-a', 'weechat',
-            '-i', 'icon.png',
-            '-t', 5000,
-            '-u', 'normal',
+            '--app-name', 'weechat',
+            '--icon', 'icon.png',
+            '--expire-time', 5000,
+            '--urgency', 'normal',
             'source',
             'message'
         ])

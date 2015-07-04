@@ -186,10 +186,10 @@ def send_notification(notification):
     """Sends the given notification to the user."""
     notify_cmd = [
         'notify-send',
-        '-a', 'weechat',
-        '-i', notification.icon,
-        '-t', notification.timeout,
-        '-u', notification.urgency,
+        '--app-name', 'weechat',
+        '--icon', notification.icon,
+        '--expire-time', notification.timeout,
+        '--urgency', notification.urgency,
         notification.source,
         notification.message
     ]
