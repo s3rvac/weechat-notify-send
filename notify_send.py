@@ -114,12 +114,12 @@ def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
 
 def notification_should_be_sent(buffer, prefix, is_highlight):
     """Should a notification be sent?"""
-    if not notify_for_current_buffer():
-        if buffer == weechat.current_buffer():
+    if buffer == weechat.current_buffer():
+        if not notify_for_current_buffer():
             return False
 
-    if not notify_when_away():
-        if weechat.buffer_get_string(buffer, 'localvar_away'):
+    if weechat.buffer_get_string(buffer, 'localvar_away'):
+        if not notify_when_away():
             return False
 
     if is_private_message(buffer):
