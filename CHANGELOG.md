@@ -4,6 +4,8 @@ Changelog
 dev
 ---
 
+* Added a new option: `notify_for_current_buffer`. It allows to disable sending
+  of notifications for the currently active buffer.
 * Added new options: `max_length` and `ellipsis`. They allow to limit the
   maximal length of notifications.
 * Added a new option: `escape_html`. It escapes the `<`, `>`, and `&` HTML

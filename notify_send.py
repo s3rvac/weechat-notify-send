@@ -64,6 +64,9 @@ SCRIPT_CHARSET = ''
 
 # Script settings.
 SETTINGS = {
+    'notify_for_current_buffer': ('on',
+                                  'Send also notifications for the currently '
+                                  'active buffer.'),
     'escape_html': ('on',
                     "Escapes the '<', '>', and '&' characters "
                     "in notification messages."),
@@ -109,6 +112,10 @@ def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
 
 def notification_should_be_sent(buffer, prefix, is_highlight):
     """Should a notification be sent?"""
+    if not notify_for_current_buffer():
+        if buffer == weechat.current_buffer():
+            return False
+
     if is_private_message(buffer):
         if i_am_author_of_message(buffer, prefix):
             # Do not send notifications from myself.
@@ -120,6 +127,11 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
 
     # We send notifications only for private messages or hightlights.
     return False
+
+
+def notify_for_current_buffer():
+    """Should we also send notifications for the current buffer?"""
+    return weechat.config_get_plugin('notify_for_current_buffer') == 'on'
 
 
 def is_private_message(buffer):
