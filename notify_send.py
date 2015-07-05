@@ -64,6 +64,8 @@ SCRIPT_CHARSET = ''
 
 # Script settings.
 SETTINGS = {
+    'notify_when_away': ('on',
+                         'Send also notifications when away.'),
     'notify_for_current_buffer': ('on',
                                   'Send also notifications for the currently '
                                   'active buffer.'),
@@ -116,6 +118,10 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
         if buffer == weechat.current_buffer():
             return False
 
+    if not notify_when_away():
+        if weechat.buffer_get_string(buffer, 'localvar_away'):
+            return False
+
     if is_private_message(buffer):
         if i_am_author_of_message(buffer, prefix):
             # Do not send notifications from myself.
@@ -132,6 +138,11 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
 def notify_for_current_buffer():
     """Should we also send notifications for the current buffer?"""
     return weechat.config_get_plugin('notify_for_current_buffer') == 'on'
+
+
+def notify_when_away():
+    """Should we also send notifications when away?"""
+    return weechat.config_get_plugin('notify_when_away') == 'on'
 
 
 def is_private_message(buffer):

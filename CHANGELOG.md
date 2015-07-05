@@ -4,7 +4,8 @@ Changelog
 dev
 ---
 
-* -
+* Added a new option: `notify_when_away`. It allows to disable sending of
+  notifications when away.
 
 0.2 (2015-07-05)
 ----------------
