@@ -118,7 +118,7 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
         if not notify_for_current_buffer():
             return False
 
-    if weechat.buffer_get_string(buffer, 'localvar_away'):
+    if is_away(buffer):
         if not notify_when_away():
             return False
 
@@ -143,6 +143,11 @@ def notify_for_current_buffer():
 def notify_when_away():
     """Should we also send notifications when away?"""
     return weechat.config_get_plugin('notify_when_away') == 'on'
+
+
+def is_away(buffer):
+    """Is the user away?"""
+    return weechat.buffer_get_string(buffer, 'localvar_away') != ''
 
 
 def is_private_message(buffer):
