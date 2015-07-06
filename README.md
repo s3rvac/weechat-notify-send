@@ -35,10 +35,11 @@ The plugin allows you to set the following settings (either by running `/set
 plugins.var.python.notify_send.XXX YYY` or by using the
 [iset.pl](https://weechat.org/scripts/source/iset.pl.html/) plugin.
 
-* `notify_when_away`: Send also notifications when away.
+* `notify_when_away`: Send also notifications when away. Default: `on`.
 * `notify_for_current_buffer`: Send also notifications for the currently active
-  buffer.
-* `nick_separator`: Separator to be put between a nick and a message.
+  buffer. Default: `on`.
+* `nick_separator`: Separator to be put between a nick and a message. Default:
+  `: `.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML
   characters in notification messages. Default: `on`.
 * `max_length`: Maximal length of a notification (0 means no limit). Default:
