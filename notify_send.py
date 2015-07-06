@@ -35,8 +35,7 @@ import subprocess
 try:
     import weechat
 except ImportError:
-    print('This script has to run under WeeChat.')
-    print('Get WeeChat now at http://www.weechat.org/')
+    print('This script has to run under WeeChat (http://www.weechat.org/).')
     sys.exit(1)
 
 
