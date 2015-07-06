@@ -40,6 +40,7 @@ weechat = mock.Mock()
 sys.modules['weechat'] = weechat
 
 from notify_send import Notification
+from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import notification_should_be_sent
 from notify_send import send_notification
@@ -95,6 +96,13 @@ class TestsBase(unittest.TestCase):
         global weechat
         weechat = patcher.start()
         self.addCleanup(patcher.stop)
+
+
+class DefaultValueOfTests(TestsBase):
+    """Tests for default_value_of()."""
+
+    def test_returns_correct_value(self):
+        self.assertEqual(default_value_of('nick_separator'), ': ')
 
 
 class NotificationShouldBeSentTests(TestsBase):

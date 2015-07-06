@@ -97,6 +97,11 @@ class Notification(object):
         self.urgency = urgency
 
 
+def default_value_of(option):
+    """Returns the default value of the given option."""
+    return SETTINGS[option][0]
+
+
 def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
                     prefix, message):
     """A callback for notifications from WeeChat."""
