@@ -41,6 +41,7 @@ sys.modules['weechat'] = weechat
 
 from notify_send import Notification
 from notify_send import escape_html
+from notify_send import notification_should_be_sent
 from notify_send import send_notification
 from notify_send import shorten_message
 
@@ -48,6 +49,39 @@ from notify_send import shorten_message
 def new_notification(source='source', message='message', icon='icon.png',
                      timeout=5000, urgency='normal'):
     return Notification(source, message, icon, timeout, urgency)
+
+
+def set_config_option(option, value):
+    """Sets the given configuration option to the given value."""
+    orig_config_get_plugin = weechat.config_get_plugin.side_effect
+
+    def config_get_plugin(opt):
+        if opt == option:
+            return value
+
+        if orig_config_get_plugin is not None:
+            return orig_config_get_plugin(opt)
+
+        # Assume that options are off by default.
+        return 'off'
+
+    weechat.config_get_plugin.side_effect = config_get_plugin
+
+
+def set_buffer_string(buffer, string, value):
+    """Sets the given buffer string to the given value."""
+    orig_buffer_get_string = weechat.buffer_get_string.side_effect
+
+    def buffer_get_string(b, s):
+        if b == buffer and s == string:
+            return value
+
+        if orig_buffer_get_string is not None:
+            return orig_buffer_get_string(b, s)
+
+        return ''
+
+    weechat.buffer_get_string.side_effect = buffer_get_string
 
 
 class TestsBase(unittest.TestCase):
@@ -61,6 +95,82 @@ class TestsBase(unittest.TestCase):
         global weechat
         weechat = patcher.start()
         self.addCleanup(patcher.stop)
+
+
+class NotificationShouldBeSentTests(TestsBase):
+    """Tests for notification_should_be_sent()."""
+
+    def notification_should_be_sent(self, buffer='buffer', prefix='prefix',
+                                    is_highlight=True):
+        return notification_should_be_sent(buffer, prefix, is_highlight)
+
+    def test_returns_false_when_away_and_option_is_off(self):
+        set_config_option('notify_when_away', 'off')
+
+        should_be_sent = self.notification_should_be_sent()
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_false_when_highlight_in_current_buffer_and_option_is_off(self):
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'off')
+        BUFFER = 'buffer'
+        weechat.current_buffer.return_value = BUFFER
+
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_false_for_notification_from_self(self):
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_type', 'private')
+        PREFIX = 'prefix'
+        set_buffer_string(BUFFER, 'localvar_nick', PREFIX)
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            prefix=PREFIX
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_false_when_neither_private_message_or_highlight(self):
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_type', '')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_sends_notification_on_private_message(self):
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_type', 'private')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertTrue(should_be_sent)
+
+    def test_sends_notification_on_highlight(self):
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+
+        should_be_sent = self.notification_should_be_sent(
+            is_highlight=True
+        )
+
+        self.assertTrue(should_be_sent)
 
 
 class EscapeHtmlTests(TestsBase):
