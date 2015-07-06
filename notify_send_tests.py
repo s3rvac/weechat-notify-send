@@ -35,7 +35,7 @@ except ImportError:
     import mock  # Python 2
 
 # We need to mock the 'weechat' import because the tests do not run under
-# weechat. Moreover, it allows us to test the module properly.
+# WeeChat, so the import would fail.
 weechat = mock.Mock()
 sys.modules['weechat'] = weechat
 
@@ -50,7 +50,20 @@ def new_notification(source='source', message='message', icon='icon.png',
     return Notification(source, message, icon, timeout, urgency)
 
 
-class EscapeHtmlTests(unittest.TestCase):
+class TestsBase(unittest.TestCase):
+    """A base class for all tests."""
+
+    def setUp(self):
+        # Mock weechat again before running any tests. We need to do this
+        # because tests may change the global mock (return value, side effects,
+        # etc.) and thus affect other tests.
+        patcher = mock.patch('notify_send.weechat')
+        global weechat
+        weechat = patcher.start()
+        self.addCleanup(patcher.stop)
+
+
+class EscapeHtmlTests(TestsBase):
     """Tests for escape_html()."""
 
     def test_properly_escapes_needed_html_characters(self):
@@ -60,7 +73,7 @@ class EscapeHtmlTests(unittest.TestCase):
         )
 
 
-class ShortenMessageTests(unittest.TestCase):
+class ShortenMessageTests(TestsBase):
     """Tests for shorten_message()."""
 
     def test_returns_complete_message_when_max_length_is_zero(self):
@@ -98,7 +111,7 @@ class ShortenMessageTests(unittest.TestCase):
         )
 
 
-class SendNotificationTests(unittest.TestCase):
+class SendNotificationTests(TestsBase):
     """Tests for send_notification()."""
 
     def setUp(self):
