@@ -38,6 +38,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 * `notify_when_away`: Send also notifications when away.
 * `notify_for_current_buffer`: Send also notifications for the currently active
   buffer.
+* `nick_separator`: Separator to be put between a nick and a message.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML
   characters in notification messages. Default: `on`.
 * `max_length`: Maximal length of a notification (0 means no limit). Default:

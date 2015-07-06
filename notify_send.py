@@ -68,6 +68,8 @@ SETTINGS = {
     'notify_for_current_buffer': ('on',
                                   'Send also notifications for the currently '
                                   'active buffer.'),
+    'nick_separator': (': ',
+                       'A separator between a nick and a message'),
     'escape_html': ('on',
                     "Escapes the '<', '>', and '&' characters "
                     "in notification messages."),
@@ -169,7 +171,7 @@ def prepare_notification(buffer, is_highlight, prefix, message):
     if is_highlight:
         source = (weechat.buffer_get_string(buffer, 'short_name') or
                   weechat.buffer_get_string(buffer, 'name'))
-        message = prefix + ': ' + message
+        message = prefix + nick_separator() + message
     else:
         # A private message.
         source = prefix
@@ -187,6 +189,12 @@ def prepare_notification(buffer, is_highlight, prefix, message):
     urgency = weechat.config_get_plugin('urgency')
 
     return Notification(source, message, icon, timeout, urgency)
+
+
+def nick_separator():
+    """Returns a nick separator to be used."""
+    separator = weechat.config_get_plugin('nick_separator')
+    return separator if separator else default_value_of('nick_separator')
 
 
 def shorten_message(message, max_length, ellipsis):

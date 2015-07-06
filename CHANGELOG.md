@@ -4,6 +4,8 @@ Changelog
 dev
 ---
 
+* Added a new option: `nick_separator`. It allows to set a custom separator
+  between a nick and a message.
 * Added a new option: `notify_when_away`. It allows to disable sending of
   notifications when away.
 

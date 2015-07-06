@@ -42,6 +42,7 @@ sys.modules['weechat'] = weechat
 from notify_send import Notification
 from notify_send import default_value_of
 from notify_send import escape_html
+from notify_send import nick_separator
 from notify_send import notification_should_be_sent
 from notify_send import send_notification
 from notify_send import shorten_message
@@ -188,6 +189,24 @@ class EscapeHtmlTests(TestsBase):
         self.assertEqual(
             escape_html('< > &'),
             '&lt; &gt; &amp;'
+        )
+
+
+class NickSeparatorTests(TestsBase):
+    """Tests for nick_separator()."""
+
+    def test_returns_value_from_config_when_set(self):
+        NICK_SEPARATOR = ' --> '
+        set_config_option('nick_separator', NICK_SEPARATOR)
+
+        self.assertEqual(nick_separator(), NICK_SEPARATOR)
+
+    def test_returns_default_value_when_config_value_is_not_set(self):
+        set_config_option('nick_separator', '')
+
+        self.assertEqual(
+            nick_separator(),
+            default_value_of('nick_separator')
         )
 
 
