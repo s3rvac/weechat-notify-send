@@ -69,7 +69,7 @@ SETTINGS = {
                                   'Send also notifications for the currently '
                                   'active buffer.'),
     'nick_separator': (': ',
-                       'A separator between a nick and a message'),
+                       'A separator between a nick and a message.'),
     'escape_html': ('on',
                     "Escapes the '<', '>', and '&' characters "
                     "in notification messages."),
