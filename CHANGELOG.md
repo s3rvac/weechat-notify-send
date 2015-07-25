@@ -1,8 +1,8 @@
 Changelog
 =========
 
-dev
----
+0.3 (2015-07-25)
+----------------
 
 * Added a new option: `ignore_nicks_starting_with`. It is a comma-separated
   list of nick prefixes from which no notifications should be shown.
