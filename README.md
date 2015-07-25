@@ -38,6 +38,8 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 * `notify_when_away`: Send also notifications when away. Default: `on`.
 * `notify_for_current_buffer`: Send also notifications for the currently active
   buffer. Default: `on`.
+* `ignore_nicks`: A comma-separated list of nicks from which no notifications
+  should be shown. Default: `''`.
 * `nick_separator`: Separator to be put between a nick and a message. Default:
   `: `.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML

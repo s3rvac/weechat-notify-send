@@ -4,6 +4,8 @@ Changelog
 dev
 ---
 
+* Added a new option: `ignore_nicks`. It is a comma-separated list of nicks
+  from which no notifications should be shown.
 * Added a new option: `nick_separator`. It allows to set a custom separator
   between a nick and a message.
 * Added a new option: `notify_when_away`. It allows to disable sending of

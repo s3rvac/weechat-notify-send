@@ -68,6 +68,9 @@ SETTINGS = {
     'notify_for_current_buffer': ('on',
                                   'Send also notifications for the currently '
                                   'active buffer.'),
+    'ignore_nicks': ('',
+                     'A comma-separated list of nicks from which '
+                     'no notifications should be shown.'),
     'nick_separator': (': ',
                        'A separator between a nick and a message.'),
     'escape_html': ('on',
@@ -128,6 +131,9 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
         if not notify_when_away():
             return False
 
+    if ignore_notifications_from(prefix):
+        return False
+
     if is_private_message(buffer):
         if i_am_author_of_message(buffer, prefix):
             # Do not send notifications from myself.
@@ -164,6 +170,17 @@ def is_private_message(buffer):
 def i_am_author_of_message(buffer, prefix):
     """Am I (the current WeeChat user) the author of the message?"""
     return weechat.buffer_get_string(buffer, 'localvar_nick') == prefix
+
+
+def ignore_notifications_from(nick):
+    """Should notifications from the given nick be ignored?"""
+    return nick in ignored_nicks()
+
+
+def ignored_nicks():
+    """A generator of nicks from which notifications should be ignored."""
+    for nick in weechat.config_get_plugin('ignore_nicks').split(','):
+        yield nick.strip()
 
 
 def prepare_notification(buffer, is_highlight, prefix, message):

@@ -42,6 +42,7 @@ sys.modules['weechat'] = weechat
 from notify_send import Notification
 from notify_send import default_value_of
 from notify_send import escape_html
+from notify_send import ignore_notifications_from
 from notify_send import nick_separator
 from notify_send import notification_should_be_sent
 from notify_send import send_notification
@@ -158,6 +159,19 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
+    def test_returns_false_when_nick_is_ignored(self):
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_type', 'private')
+        set_config_option('ignore_nicks', 'nick')
+
+        should_be_sent = self.notification_should_be_sent(
+            prefix='nick'
+        )
+
+        self.assertFalse(should_be_sent)
+
     def test_sends_notification_on_private_message(self):
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
@@ -180,6 +194,35 @@ class NotificationShouldBeSentTests(TestsBase):
         )
 
         self.assertTrue(should_be_sent)
+
+
+class IgnoreNotificationsFromTests(TestsBase):
+    """Tests for ignore_notifications_from()."""
+
+    def test_returns_false_when_nothing_is_ignored(self):
+        set_config_option('ignore_nicks', '')
+
+        self.assertFalse(ignore_notifications_from('nick'))
+
+    def test_returns_false_when_nick_is_not_between_ignored(self):
+        set_config_option('ignore_nicks', 'nick1,nick2,nick3')
+
+        self.assertFalse(ignore_notifications_from('wizard'))
+
+    def test_returns_true_when_nick_is_ignored(self):
+        set_config_option('ignore_nicks', 'nick')
+
+        self.assertTrue(ignore_notifications_from('nick'))
+
+    def test_returns_true_when_nick_is_between_ignored(self):
+        set_config_option('ignore_nicks', 'nick1,nick2,nick3')
+
+        self.assertTrue(ignore_notifications_from('nick2'))
+
+    def test_strips_beginning_and_trailing_whitespace_from_ignored_nicks(self):
+        set_config_option('ignore_nicks', '  nick  ')
+
+        self.assertTrue(ignore_notifications_from('nick'))
 
 
 class EscapeHtmlTests(TestsBase):
