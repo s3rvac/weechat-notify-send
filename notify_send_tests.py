@@ -224,6 +224,26 @@ class IgnoreNotificationsFromTests(TestsBase):
 
         self.assertTrue(ignore_notifications_from('nick'))
 
+    def test_returns_false_when_nick_is_not_prefixed_with_ignored_prefix(self):
+        set_config_option('ignore_nicks_starting_with', 'pre_')
+
+        self.assertFalse(ignore_notifications_from('nick'))
+
+    def test_returns_true_when_nick_is_prefixed_with_ignored_prefix(self):
+        set_config_option('ignore_nicks_starting_with', 'pre_')
+
+        self.assertTrue(ignore_notifications_from('pre_nick'))
+
+    def test_returns_true_when_nick_is_prefixed_with_prefix_between_ignored_prefixes(self):
+        set_config_option('ignore_nicks_starting_with', 'pre1_,pre2_,pre3_')
+
+        self.assertTrue(ignore_notifications_from('pre2_nick'))
+
+    def test_strips_beginning_and_trailing_whitespace_from_ignored_prefixes(self):
+        set_config_option('ignore_nicks_starting_with', '  pre_  ')
+
+        self.assertTrue(ignore_notifications_from('pre_nick'))
+
 
 class EscapeHtmlTests(TestsBase):
     """Tests for escape_html()."""

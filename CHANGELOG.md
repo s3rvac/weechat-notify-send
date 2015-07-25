@@ -4,6 +4,8 @@ Changelog
 dev
 ---
 
+* Added a new option: `ignore_nicks_starting_with`. It is a comma-separated
+  list of nick prefixes from which no notifications should be shown.
 * Added a new option: `ignore_nicks`. It is a comma-separated list of nicks
   from which no notifications should be shown.
 * Added a new option: `nick_separator`. It allows to set a custom separator

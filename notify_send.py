@@ -71,6 +71,10 @@ SETTINGS = {
     'ignore_nicks': ('',
                      'A comma-separated list of nicks from which '
                      'no notifications should be shown.'),
+    'ignore_nicks_starting_with': ('',
+                                   'A comma-separated list of nick prefixes '
+                                   'from which no notifications should be '
+                                   'shown.'),
     'nick_separator': (': ',
                        'A separator between a nick and a message.'),
     'escape_html': ('on',
@@ -174,13 +178,29 @@ def i_am_author_of_message(buffer, prefix):
 
 def ignore_notifications_from(nick):
     """Should notifications from the given nick be ignored?"""
-    return nick in ignored_nicks()
+    if nick in ignored_nicks():
+        return True
+
+    for prefix in ignored_nick_prefixes():
+        if nick.startswith(prefix):
+            return True
+
+    return False
 
 
 def ignored_nicks():
     """A generator of nicks from which notifications should be ignored."""
     for nick in weechat.config_get_plugin('ignore_nicks').split(','):
         yield nick.strip()
+
+
+def ignored_nick_prefixes():
+    """A generator of nick prefixes from which notifications should be
+    ignored.
+    """
+    prefixes = weechat.config_get_plugin('ignore_nicks_starting_with')
+    for prefix in prefixes.split(','):
+        yield prefix.strip()
 
 
 def prepare_notification(buffer, is_highlight, prefix, message):

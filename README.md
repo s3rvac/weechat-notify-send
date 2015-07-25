@@ -40,6 +40,8 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   buffer. Default: `on`.
 * `ignore_nicks`: A comma-separated list of nicks from which no notifications
   should be shown. Default: `''`.
+* `ignore_nicks_starting_with`: A comma-separated list of nick prefixes from
+  which no notifications should be shown. Default: `''`.
 * `nick_separator`: Separator to be put between a nick and a message. Default:
   `: `.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML
