@@ -63,35 +63,53 @@ SCRIPT_CHARSET = ''
 
 # Script settings.
 SETTINGS = {
-    'notify_when_away': ('on',
-                         'Send also notifications when away.'),
-    'notify_for_current_buffer': ('on',
-                                  'Send also notifications for the currently '
-                                  'active buffer.'),
-    'ignore_nicks': ('',
-                     'A comma-separated list of nicks from which '
-                     'no notifications should be shown.'),
-    'ignore_nicks_starting_with': ('',
-                                   'A comma-separated list of nick prefixes '
-                                   'from which no notifications should be '
-                                   'shown.'),
-    'nick_separator': (': ',
-                       'A separator between a nick and a message.'),
-    'escape_html': ('on',
-                    "Escapes the '<', '>', and '&' characters "
-                    "in notification messages."),
-    'max_length': ('72',
-                   'Maximal length of a notification (0 means no limit).'),
-    'ellipsis': ('[..]',
-                 'Ellipsis to be used for notifications that are too '
-                 'long.'),
-    'icon': ('/usr/share/icons/hicolor/32x32/apps/weechat.png',
-             'Path to an icon to be shown in notifications.'),
-    'timeout': ('5000',
-                'Time after which the notification disappears '
-                '(in milliseconds; set to 0 to disable).'),
-    'urgency': ('normal',
-                'Urgency (low, normal, critical).')
+    'notify_when_away': (
+        'on',
+        'Send also notifications when away.'
+    ),
+    'notify_for_current_buffer': (
+        'on',
+        'Send also notifications for the currently active buffer.'
+    ),
+    'ignore_nicks': (
+        '',
+        'A comma-separated list of nicks from which no notifications should '
+        'be shown.'
+    ),
+    'ignore_nicks_starting_with': (
+        '',
+        'A comma-separated list of nick prefixes from which no '
+        'notifications should be shown.'
+    ),
+    'nick_separator': (
+        ': ',
+        'A separator between a nick and a message.'
+    ),
+    'escape_html': (
+        'on',
+        "Escapes the '<', '>', and '&' characters in notification messages."
+    ),
+    'max_length': (
+        '72',
+        'Maximal length of a notification (0 means no limit).'
+    ),
+    'ellipsis': (
+        '[..]',
+        'Ellipsis to be used for notifications that are too long.'
+    ),
+    'icon': (
+        '/usr/share/icons/hicolor/32x32/apps/weechat.png',
+        'Path to an icon to be shown in notifications.'
+    ),
+    'timeout': (
+        '5000',
+        'Time after which the notification disappears (in milliseconds; '
+        'set to 0 to disable).'
+    ),
+    'urgency': (
+        'normal',
+        'Urgency (low, normal, critical).'
+    )
 }
 
 
