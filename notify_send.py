@@ -165,7 +165,7 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
     if is_highlight:
         return True
 
-    # We send notifications only for private messages or hightlights.
+    # We send notifications only for private messages or highlights.
     return False
 
 
