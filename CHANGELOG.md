@@ -1,8 +1,8 @@
 Changelog
 =========
 
-dev
----
+0.3.1 (2015-07-27)
+------------------
 
 * Fixed sending of notifications when `ignore_nicks_starting_with` is empty
   (the script erroneously ignored all notifications).
