@@ -200,7 +200,7 @@ def ignore_notifications_from(nick):
         return True
 
     for prefix in ignored_nick_prefixes():
-        if nick.startswith(prefix):
+        if prefix and nick.startswith(prefix):
             return True
 
     return False
