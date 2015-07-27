@@ -201,6 +201,7 @@ class IgnoreNotificationsFromTests(TestsBase):
 
     def test_returns_false_when_nothing_is_ignored(self):
         set_config_option('ignore_nicks', '')
+        set_config_option('ignore_nicks_starting_with', '')
 
         self.assertFalse(ignore_notifications_from('nick'))
 
