@@ -27,8 +27,9 @@
 # SOFTWARE.
 #
 
-import sys
+import re
 import subprocess
+import sys
 
 
 # Ensure that we are running under weechat.
@@ -129,21 +130,32 @@ def default_value_of(option):
     return SETTINGS[option][0]
 
 
+def nick_from_prefix(prefix):
+    """Returns a nick from the given prefix.
+
+    The prefix comes from WeeChat. It is a nick with an optional mode (e.g. @
+    if the user is an operator or + if the user has voice).
+    """
+    # We have to remove the mode (if any).
+    return re.sub(r'^[@+](.*)', r'\1', prefix)
+
+
 def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
                     prefix, message):
     """A callback for notifications from WeeChat."""
     is_highlight = int(is_highlight)
+    nick = nick_from_prefix(prefix)
 
-    if notification_should_be_sent(buffer, prefix, is_highlight):
+    if notification_should_be_sent(buffer, nick, is_highlight):
         notification = prepare_notification(
-            buffer, is_highlight, prefix, message
+            buffer, is_highlight, nick, message
         )
         send_notification(notification)
 
     return weechat.WEECHAT_RC_OK
 
 
-def notification_should_be_sent(buffer, prefix, is_highlight):
+def notification_should_be_sent(buffer, nick, is_highlight):
     """Should a notification be sent?"""
     if buffer == weechat.current_buffer():
         if not notify_for_current_buffer():
@@ -153,11 +165,11 @@ def notification_should_be_sent(buffer, prefix, is_highlight):
         if not notify_when_away():
             return False
 
-    if ignore_notifications_from(prefix):
+    if ignore_notifications_from(nick):
         return False
 
     if is_private_message(buffer):
-        if i_am_author_of_message(buffer, prefix):
+        if i_am_author_of_message(buffer, nick):
             # Do not send notifications from myself.
             return False
         return True
@@ -189,9 +201,9 @@ def is_private_message(buffer):
     return weechat.buffer_get_string(buffer, 'localvar_type') == 'private'
 
 
-def i_am_author_of_message(buffer, prefix):
+def i_am_author_of_message(buffer, nick):
     """Am I (the current WeeChat user) the author of the message?"""
-    return weechat.buffer_get_string(buffer, 'localvar_nick') == prefix
+    return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
 
 
 def ignore_notifications_from(nick):
@@ -221,15 +233,15 @@ def ignored_nick_prefixes():
         yield prefix.strip()
 
 
-def prepare_notification(buffer, is_highlight, prefix, message):
+def prepare_notification(buffer, is_highlight, nick, message):
     """Prepares a notification from the given data."""
     if is_highlight:
         source = (weechat.buffer_get_string(buffer, 'short_name') or
                   weechat.buffer_get_string(buffer, 'name'))
-        message = prefix + nick_separator() + message
+        message = nick + nick_separator() + message
     else:
         # A private message.
-        source = prefix
+        source = nick
 
     max_length = int(weechat.config_get_plugin('max_length'))
     if max_length > 0:
