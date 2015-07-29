@@ -43,6 +43,7 @@ from notify_send import Notification
 from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import ignore_notifications_from
+from notify_send import nick_from_prefix
 from notify_send import nick_separator
 from notify_send import notification_should_be_sent
 from notify_send import send_notification
@@ -105,6 +106,19 @@ class DefaultValueOfTests(TestsBase):
 
     def test_returns_correct_value(self):
         self.assertEqual(default_value_of('nick_separator'), ': ')
+
+
+class NickFromPrefixTests(TestsBase):
+    """Tests for nick_from_prefix()."""
+
+    def test_returns_correct_value_when_prefix_is_just_nick(self):
+        self.assertEqual(nick_from_prefix('nick'), 'nick')
+
+    def test_returns_correct_value_when_prefix_is_nick_with_op(self):
+        self.assertEqual(nick_from_prefix('@nick'), 'nick')
+
+    def test_returns_correct_value_when_prefix_is_nick_with_voice(self):
+        self.assertEqual(nick_from_prefix('+nick'), 'nick')
 
 
 class NotificationShouldBeSentTests(TestsBase):

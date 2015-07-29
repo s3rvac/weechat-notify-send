@@ -1,6 +1,13 @@
 Changelog
 =========
 
+dev
+---
+
+* Fixed the obtaining of a nick from WeeChat. Previously, the nick might have
+  been prefixed with a mode, e.g `@` when the user was an op. Modes are now
+  removed and not shown in the notifications.
+
 0.3.1 (2015-07-27)
 ------------------
 
