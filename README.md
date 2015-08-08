@@ -31,7 +31,7 @@ $ ln -s ../notify_send.py
 Settings
 --------
 
-The plugin allows you to set the following settings (either by running `/set
+The plugin allows you to set the following settings, either by running `/set
 plugins.var.python.notify_send.XXX YYY` or by using the
 [iset.pl](https://weechat.org/scripts/source/iset.pl.html/) plugin.
 
@@ -42,18 +42,18 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   should be shown. Default: `''`.
 * `ignore_nicks_starting_with`: A comma-separated list of nick prefixes from
   which no notifications should be shown. Default: `''`.
-* `nick_separator`: Separator to be put between a nick and a message. Default:
-  `: `.
+* `nick_separator`: A separator to be put between a nick and a message.
+  Default: `: `.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML
   characters in notification messages. Default: `on`.
-* `max_length`: Maximal length of a notification (0 means no limit). Default:
-  72.
-* `ellipsis`: Ellipsis to be used for notifications that are too long. Default:
-  `'[..]'`.
-* `icon`: Path to an icon to be shown in notifications. Default:
+* `max_length`: The maximal length of a notification (0 means no limit).
+  Default: 72.
+* `ellipsis`: An ellipsis to be used for notifications that are too long.
+  Default: `'[..]'`.
+* `icon`: A path to an icon to be shown in notifications. Default:
   `/usr/share/icons/hicolor/32x32/apps/weechat.png`.
 * `timeout`: Time after which the notification disappears (in milliseconds).
-  Set to 0 to disable. Default: 5000.
+  Set it to 0 to disable the timeout. Default: 5000 (5 seconds).
 * `urgency`: Notification urgency (`low`, `normal`, `critical`). Default:
   `normal`.
 
