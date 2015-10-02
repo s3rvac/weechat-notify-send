@@ -42,6 +42,7 @@ sys.modules['weechat'] = weechat
 from notify_send import Notification
 from notify_send import default_value_of
 from notify_send import escape_html
+from notify_send import escape_slashes
 from notify_send import ignore_notifications_from
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
@@ -267,6 +268,16 @@ class EscapeHtmlTests(TestsBase):
         self.assertEqual(
             escape_html('< > &'),
             '&lt; &gt; &amp;'
+        )
+
+
+class EscapeSlashesTests(TestsBase):
+    """Tests for escape_slashes()."""
+
+    def test_properly_escapes_slashes(self):
+        self.assertEqual(
+            escape_slashes(r'a\tb\nc'),
+            r'a\\tb\\nc'
         )
 
 

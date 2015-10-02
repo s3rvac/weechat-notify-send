@@ -4,7 +4,8 @@ Changelog
 dev
 ---
 
-* -
+* Fixed interpretation of messages containing backslashes by escaping
+  them.
 
 0.3.2 (2015-07-29)
 ------------------
