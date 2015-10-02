@@ -1,8 +1,8 @@
 Changelog
 =========
 
-dev
----
+0.3.3 (2015-10-02)
+------------------
 
 * Fixed interpretation of messages containing backslashes by escaping
   them.
