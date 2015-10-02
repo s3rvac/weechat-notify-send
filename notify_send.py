@@ -251,6 +251,8 @@ def prepare_notification(buffer, is_highlight, nick, message):
     if weechat.config_get_plugin('escape_html') == 'on':
         message = escape_html(message)
 
+    message = escape_slashes(message)
+
     icon = weechat.config_get_plugin('icon')
     timeout = weechat.config_get_plugin('timeout')
     urgency = weechat.config_get_plugin('urgency')
@@ -287,6 +289,14 @@ def escape_html(message):
     message = message.replace('<', '&lt;')
     message = message.replace('>', '&gt;')
     return message
+
+
+def escape_slashes(message):
+    """Escapes slashes in the given message."""
+    # We need to escape backslashes to prevent notify-send from interpreting
+    # them, e.g. we do not want to print a newline when the message contains
+    # '\n'.
+    return message.replace('\\', r'\\')
 
 
 def send_notification(notification):
