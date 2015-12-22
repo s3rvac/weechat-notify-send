@@ -1,8 +1,8 @@
 Changelog
 =========
 
-dev
----
+0.3.4 (2015-12-22)
+------------------
 
 * Fixed occasional messing of the WeeChat screen when assertion messages are
   emitted by notify-send.
