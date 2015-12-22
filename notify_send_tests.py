@@ -26,6 +26,7 @@
 # SOFTWARE.
 #
 
+import os
 import sys
 import unittest
 
@@ -357,15 +358,23 @@ class SendNotificationTests(TestsBase):
 
         send_notification(notification)
 
-        self.subprocess.check_call.assert_called_once_with([
-            'notify-send',
-            '--app-name', 'weechat',
-            '--icon', 'icon.png',
-            '--expire-time', '5000',
-            '--urgency', 'normal',
-            'source',
-            'message'
-        ])
+        class AnyDevNullStream:
+            def __eq__(self, other):
+                return other.name == os.devnull
+
+        self.subprocess.check_call.assert_called_once_with(
+            [
+                'notify-send',
+                '--app-name', 'weechat',
+                '--icon', 'icon.png',
+                '--expire-time', '5000',
+                '--urgency', 'normal',
+                'source',
+                'message'
+            ],
+            stderr=self.subprocess.STDOUT,
+            stdout=AnyDevNullStream()
+        )
 
     def test_does_not_include_icon_in_command_when_icon_is_not_set(self):
         notification = new_notification(icon='')

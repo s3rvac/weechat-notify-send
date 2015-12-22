@@ -27,6 +27,7 @@
 # SOFTWARE.
 #
 
+import os
 import re
 import subprocess
 import sys
@@ -309,7 +310,18 @@ def send_notification(notification):
     if notification.urgency:
         notify_cmd += ['--urgency', notification.urgency]
     notify_cmd += [notification.source, notification.message]
-    subprocess.check_call(notify_cmd)
+
+    # Prevent notify-send from messing up the WeeChat screen when occasionally
+    # emitting assertion messages by redirecting the output to /dev/null (you
+    # would need to run /redraw to fix the screen).
+    # In Python < 3.3, there is no subprocess.DEVNULL, so we have to use a
+    # workaround.
+    with open(os.devnull, 'wb') as devnull:
+        subprocess.check_call(
+            notify_cmd,
+            stderr=subprocess.STDOUT,
+            stdout=devnull,
+        )
 
 
 if __name__ == '__main__':
