@@ -150,7 +150,7 @@ class NotificationCBTests(TestsBase):
     """Tests for notification_cb()."""
 
     def setUp(self):
-        super().setUp()
+        super(NotificationCBTests, self).setUp()
 
         # Mock notification_should_be_sent().
         patcher = mock.patch('notify_send.notification_should_be_sent')
@@ -558,7 +558,7 @@ class SendNotificationTests(TestsBase):
     """Tests for send_notification()."""
 
     def setUp(self):
-        super().setUp()
+        super(SendNotificationTests, self).setUp()
 
         # Mock subprocess.
         patcher = mock.patch('notify_send.subprocess')
