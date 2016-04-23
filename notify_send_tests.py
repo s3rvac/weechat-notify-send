@@ -49,6 +49,7 @@ from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
 from notify_send import notification_should_be_sent
+from notify_send import prepare_notification
 from notify_send import send_notification
 from notify_send import shorten_message
 
@@ -348,6 +349,112 @@ class EscapeSlashesTests(TestsBase):
             escape_slashes(r'a\tb\nc'),
             r'a\\tb\\nc'
         )
+
+
+class PrepareNotificationTests(TestsBase):
+    """Tests for prepare_notification()."""
+
+    def setUp(self):
+        super().setUp()
+        set_config_option('ellipsis', '')
+        set_config_option('escape_html', 'off')
+        set_config_option('icon', '')
+        set_config_option('max_length', 0)
+        set_config_option('timeout', 0)
+        set_config_option('urgency', '')
+
+    def prepare_notification(self, buffer='buffer', is_highlight=False,
+                             nick='nick', message='message'):
+        return prepare_notification(buffer, is_highlight, nick, message)
+
+    def test_notification_has_correct_source_and_message_when_not_highlight(self):
+        NICK = 'nick'
+        MESSAGE = 'message'
+
+        notification = self.prepare_notification(
+            is_highlight=False,
+            nick=NICK,
+            message=MESSAGE
+        )
+
+        self.assertEqual(notification.source, NICK)
+        self.assertEqual(notification.message, MESSAGE)
+
+    def test_notification_has_correct_source_and_message_when_is_highlight(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', BUFFER)
+        set_config_option('nick_separator', ': ')
+        notification = self.prepare_notification(
+            buffer=BUFFER,
+            is_highlight=True,
+            nick='nick',
+            message='message'
+        )
+
+        self.assertEqual(notification.source, BUFFER)
+        self.assertEqual(notification.message, 'nick: message')
+
+    def test_notification_has_correct_icon(self):
+        ICON = '/path/to/icon.png'
+        set_config_option('icon', ICON)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.icon, ICON)
+
+    def test_notification_has_correct_timeout(self):
+        TIMEOUT = 1000
+        set_config_option('timeout', TIMEOUT)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.timeout, TIMEOUT)
+
+    def test_notification_has_correct_urgency(self):
+        URGENCY = 'critical'
+        set_config_option('urgency', URGENCY)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.urgency, URGENCY)
+
+    def test_shortens_message_when_max_length_is_non_zero_and_message_is_long(self):
+        set_config_option('max_length', 10)
+        set_config_option('ellipsis', '[..]')
+
+        notification = self.prepare_notification(message='123456789abcd')
+
+        self.assertEqual(notification.message, '123456[..]')
+
+    def test_does_not_shorten_message_when_max_length_zero(self):
+        set_config_option('max_length', 0)
+        MESSAGE = '123456789'
+
+        notification = self.prepare_notification(message=MESSAGE)
+
+        self.assertEqual(notification.message, MESSAGE)
+
+    def test_does_not_shorten_message_when_message_is_short_enough(self):
+        set_config_option('max_length', 10)
+        MESSAGE = 10 * 'a'
+
+        notification = self.prepare_notification(message=MESSAGE)
+
+        self.assertEqual(notification.message, MESSAGE)
+
+    def test_escapes_html_when_escape_html_is_on(self):
+        set_config_option('escape_html', 'on')
+
+        notification = self.prepare_notification(message='<>')
+
+        self.assertEqual(notification.message, '&lt;&gt;')
+
+    def test_does_not_escape_html_when_escape_html_is_off(self):
+        set_config_option('escape_html', 'off')
+
+        notification = self.prepare_notification(message='<>')
+
+        self.assertEqual(notification.message, '<>')
 
 
 class NickSeparatorTests(TestsBase):
