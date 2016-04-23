@@ -113,6 +113,7 @@ class TestsBase(unittest.TestCase):
 
         # Default values for config options.
         set_config_option('notify_on_highlights', 'on')
+        set_config_option('notify_on_privmsgs', 'on')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('min_notification_delay', '0')
@@ -260,7 +261,8 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
-    def test_returns_true_on_private_message(self):
+    def test_returns_true_on_private_message_when_notify_on_privmsgs_is_on(self):
+        set_config_option('notify_on_privmsgs', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
 
@@ -270,6 +272,18 @@ class NotificationShouldBeSentTests(TestsBase):
         )
 
         self.assertTrue(should_be_sent)
+
+    def test_returns_true_on_private_message_when_notify_on_privmsgs_is_off(self):
+        set_config_option('notify_on_privmsgs', 'off')
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_type', 'private')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertFalse(should_be_sent)
 
     def test_returns_true_on_highlight_when_notify_on_highlights_is_on(self):
         set_config_option('notify_on_highlights', 'on')

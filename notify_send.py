@@ -70,6 +70,10 @@ OPTIONS = {
         'on',
         'Send notifications on highlights.'
     ),
+    'notify_on_privmsgs': (
+        'on',
+        'Send notifications on private messages.'
+    ),
     'notify_when_away': (
         'on',
         'Send also notifications when away.'
@@ -193,7 +197,7 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
         if i_am_author_of_message(buffer, nick):
             # Do not send notifications from myself.
             return False
-        return True
+        return notify_on_privmsgs()
 
     if is_highlight:
         return notify_on_highlights()
@@ -261,6 +265,11 @@ def notify_for_current_buffer():
 def notify_on_highlights():
     """Should we send notifications on highlights?"""
     return weechat.config_get_plugin('notify_on_highlights') == 'on'
+
+
+def notify_on_privmsgs():
+    """Should we send notifications on private messages?"""
+    return weechat.config_get_plugin('notify_on_privmsgs') == 'on'
 
 
 def notify_when_away():

@@ -11,6 +11,9 @@ dev
 * Added a new option: `notify_on_highlights`. It allows you to disable
   notifications on highlights. By default, notifications on highlights are
   enabled.
+* Added a new option: `notify_on_privmsgs`. It allows you to disable
+  notifications on private messages. By default, notifications on private
+  messages are enabled.
 
 0.3.4 (2015-12-22)
 ------------------
