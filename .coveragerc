@@ -1,0 +1,10 @@
+[report]
+exclude_lines =
+    # We have to re-enable the standard pragma.
+    pragma: no cover
+
+    # WeeChat import error.
+    except ImportError:
+
+    # Code that is run only when a script is executed directly.
+    if __name__ == .__main__.:
