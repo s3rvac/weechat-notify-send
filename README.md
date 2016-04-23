@@ -10,8 +10,6 @@ private-message notifications through
 It requires [libnotify](https://developer.gnome.org/libnotify/), which provides
 the `notify-send` application.
 
-A sample screenshot:
-
 ![Screenshot](screenshot.png "A sample screenshot.")
 
 Note that the precise appearance depends on the configuration of your
