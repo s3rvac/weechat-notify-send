@@ -126,6 +126,11 @@ class NickFromPrefixTests(TestsBase):
 class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
+    def setUp(self):
+        super().setUp()
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+
     def notification_should_be_sent(self, buffer='buffer', prefix='prefix',
                                     is_highlight=True):
         return notification_should_be_sent(buffer, prefix, is_highlight)
@@ -138,7 +143,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_highlight_in_current_buffer_and_option_is_off(self):
-        set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'off')
         BUFFER = 'buffer'
         weechat.current_buffer.return_value = BUFFER
@@ -148,8 +152,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_for_notification_from_self(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
         PREFIX = 'prefix'
@@ -163,8 +165,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_neither_private_message_or_highlight(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', '')
 
@@ -176,8 +176,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_nick_is_ignored(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
         set_config_option('ignore_nicks', 'nick')
@@ -189,8 +187,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_sends_notification_on_private_message(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
 
@@ -202,9 +198,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertTrue(should_be_sent)
 
     def test_sends_notification_on_highlight(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
-
         should_be_sent = self.notification_should_be_sent(
             is_highlight=True
         )
