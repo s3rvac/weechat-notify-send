@@ -111,6 +111,20 @@ class TestsBase(unittest.TestCase):
         self.addCleanup(patcher.stop)
         self.time.return_value = 0.0
 
+        # Default values for config options.
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+        set_config_option('min_notification_delay', '0')
+        set_config_option('ignore_nicks', '')
+        set_config_option('ignore_nicks_starting_with', '')
+        set_config_option('nick_separator', '')
+        set_config_option('escape_html', 'off')
+        set_config_option('max_length', '0')
+        set_config_option('ellipsis', '')
+        set_config_option('icon', '')
+        set_config_option('timeout', '0')
+        set_config_option('urgency', '')
+
 
 class DefaultValueOfTests(TestsBase):
     """Tests for default_value_of()."""
@@ -175,12 +189,6 @@ class NotificationCBTests(TestsBase):
 
 class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
-
-    def setUp(self):
-        super().setUp()
-        set_config_option('min_notification_delay', 0)
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
 
     def notification_should_be_sent(self, buffer='buffer', prefix='prefix',
                                     is_highlight=True):
@@ -395,15 +403,6 @@ class EscapeSlashesTests(TestsBase):
 
 class PrepareNotificationTests(TestsBase):
     """Tests for prepare_notification()."""
-
-    def setUp(self):
-        super().setUp()
-        set_config_option('ellipsis', '')
-        set_config_option('escape_html', 'off')
-        set_config_option('icon', '')
-        set_config_option('max_length', 0)
-        set_config_option('timeout', 0)
-        set_config_option('urgency', '')
 
     def prepare_notification(self, buffer='buffer', is_highlight=False,
                              nick='nick', message='message'):
