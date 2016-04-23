@@ -45,6 +45,7 @@ from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
 from notify_send import ignore_notifications_from
+from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
 from notify_send import notification_should_be_sent
@@ -102,6 +103,12 @@ class TestsBase(unittest.TestCase):
         weechat = patcher.start()
         self.addCleanup(patcher.stop)
 
+        # Mock time.time().
+        patcher = mock.patch('notify_send.time.time')
+        self.time = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.time.return_value = 0.0
+
 
 class DefaultValueOfTests(TestsBase):
     """Tests for default_value_of()."""
@@ -128,6 +135,7 @@ class NotificationShouldBeSentTests(TestsBase):
 
     def setUp(self):
         super().setUp()
+        set_config_option('min_notification_delay', 0)
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
 
@@ -186,6 +194,20 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
+    def test_returns_false_when_is_below_min_notification_delay(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '0.7'
+        )
+        set_config_option('min_notification_delay', 500)
+        self.time.return_value = 1.0
+
+        should_be_sent = self.notification_should_be_sent()
+
+        self.assertFalse(should_be_sent)
+
     def test_sends_notification_on_private_message(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
@@ -203,6 +225,59 @@ class NotificationShouldBeSentTests(TestsBase):
         )
 
         self.assertTrue(should_be_sent)
+
+
+class IsBelowMinNotificationDelayTests(TestsBase):
+    """Tests for is_below_min_notification_delay()."""
+
+    def test_returns_false_when_min_notification_delay_is_zero(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '1.0'
+        )
+        self.time.return_value = 1.0
+        set_config_option('min_notification_delay', 0)
+
+        self.assertFalse(is_below_min_notification_delay(BUFFER))
+
+    def test_returns_false_when_last_time_is_not_below_min_notification_delay(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '0.4'
+        )
+        self.time.return_value = 1.0
+        set_config_option('min_notification_delay', 500)
+
+        self.assertFalse(is_below_min_notification_delay(BUFFER))
+
+    def test_returns_true_when_last_time_is_below_min_notification_delay(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '1.4'
+        )
+        self.time.return_value = 1.0
+        set_config_option('min_notification_delay', 500)
+
+        self.assertTrue(is_below_min_notification_delay(BUFFER))
+
+    def test_updates_last_notification_time(self):
+        CURRENT_TIME = 1.0
+        self.time.return_value = CURRENT_TIME
+        BUFFER = 'buffer'
+
+        is_below_min_notification_delay(BUFFER)
+
+        weechat.buffer_set.assert_called_once_with(
+            BUFFER,
+            'localvar_set_notify_send_last_notification_time',
+            str(CURRENT_TIME)
+        )
 
 
 class IgnoreNotificationsFromTests(TestsBase):

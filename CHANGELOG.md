@@ -4,7 +4,10 @@ Changelog
 dev
 ---
 
-* -
+* Added a new option: `min_notification_delay`. It represents a minimal delay
+  between successive notifications from the same buffer. It is used to protect
+  from floods/spam. The default value is 500 milliseconds. Set it to 0 to
+  disable this feature (i.e. all notifications will be shown).
 
 0.3.4 (2015-12-22)
 ------------------
