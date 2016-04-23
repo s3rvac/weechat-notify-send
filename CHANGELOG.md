@@ -8,6 +8,9 @@ dev
   between successive notifications from the same buffer. It is used to protect
   from floods/spam. The default value is 500 milliseconds. Set it to 0 to
   disable this feature (i.e. all notifications will be shown).
+* Added a new option: `notify_on_highlights`. It allows you to disable
+  notifications on highlights. By default, notifications on highlights are
+  enabled.
 
 0.3.4 (2015-12-22)
 ------------------

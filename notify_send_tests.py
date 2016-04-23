@@ -112,6 +112,7 @@ class TestsBase(unittest.TestCase):
         self.time.return_value = 0.0
 
         # Default values for config options.
+        set_config_option('notify_on_highlights', 'on')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('min_notification_delay', '0')
@@ -270,12 +271,23 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertTrue(should_be_sent)
 
-    def test_returns_true_on_highlight(self):
+    def test_returns_true_on_highlight_when_notify_on_highlights_is_on(self):
+        set_config_option('notify_on_highlights', 'on')
+
         should_be_sent = self.notification_should_be_sent(
             is_highlight=True
         )
 
         self.assertTrue(should_be_sent)
+
+    def test_returns_false_on_highlight_when_notify_on_highlights_is_off(self):
+        set_config_option('notify_on_highlights', 'off')
+
+        should_be_sent = self.notification_should_be_sent(
+            is_highlight=True
+        )
+
+        self.assertFalse(should_be_sent)
 
 
 class IsBelowMinNotificationDelayTests(TestsBase):

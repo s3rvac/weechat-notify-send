@@ -66,6 +66,10 @@ SCRIPT_CHARSET = ''
 
 # Script options.
 OPTIONS = {
+    'notify_on_highlights': (
+        'on',
+        'Send notifications on highlights.'
+    ),
     'notify_when_away': (
         'on',
         'Send also notifications when away.'
@@ -192,7 +196,7 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
         return True
 
     if is_highlight:
-        return True
+        return notify_on_highlights()
 
     # We send notifications only for private messages or highlights.
     return False
@@ -252,6 +256,11 @@ def buffer_set_float(buffer, property, value):
 def notify_for_current_buffer():
     """Should we also send notifications for the current buffer?"""
     return weechat.config_get_plugin('notify_for_current_buffer') == 'on'
+
+
+def notify_on_highlights():
+    """Should we send notifications on highlights?"""
+    return weechat.config_get_plugin('notify_on_highlights') == 'on'
 
 
 def notify_when_away():
