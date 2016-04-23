@@ -259,7 +259,7 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
-    def test_sends_notification_on_private_message(self):
+    def test_returns_true_on_private_message(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
 
@@ -270,7 +270,7 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertTrue(should_be_sent)
 
-    def test_sends_notification_on_highlight(self):
+    def test_returns_true_on_highlight(self):
         should_be_sent = self.notification_should_be_sent(
             is_highlight=True
         )
