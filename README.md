@@ -29,10 +29,10 @@ $ cd ~/.weechat/python/autoload
 $ ln -s ../notify_send.py
 ```
 
-Settings
---------
+Options
+-------
 
-The plugin allows you to set the following settings, either by running `/set
+The plugin allows you to set the following options, either by running `/set
 plugins.var.python.notify_send.XXX YYY` or by using the
 [iset.pl](https://weechat.org/scripts/source/iset.pl.html/) plugin.
 

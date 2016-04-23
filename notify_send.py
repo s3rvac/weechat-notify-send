@@ -64,8 +64,8 @@ SCRIPT_SHUTDOWN_FUNC = ''
 # Used character set (utf-8 by default).
 SCRIPT_CHARSET = ''
 
-# Script settings.
-SETTINGS = {
+# Script options.
+OPTIONS = {
     'notify_when_away': (
         'on',
         'Send also notifications when away.'
@@ -134,7 +134,7 @@ class Notification(object):
 
 def default_value_of(option):
     """Returns the default value of the given option."""
-    return SETTINGS[option][0]
+    return OPTIONS[option][0]
 
 
 def nick_from_prefix(prefix):
@@ -404,7 +404,7 @@ if __name__ == '__main__':
     )
 
     # Initialization.
-    for option, (default_value, description) in SETTINGS.items():
+    for option, (default_value, description) in OPTIONS.items():
         weechat.config_set_desc_plugin(option, description)
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)
