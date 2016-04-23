@@ -5,7 +5,7 @@
 # Description: Unit tests for the project.
 # License:     MIT (see below)
 #
-# Copyright (c) 2015 by Petr Zemek <s3rvac@gmail.com> and contributors
+# Copyright (c) 2015-2016 by Petr Zemek <s3rvac@gmail.com> and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -45,9 +45,12 @@ from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
 from notify_send import ignore_notifications_from
+from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
+from notify_send import notification_cb
 from notify_send import notification_should_be_sent
+from notify_send import prepare_notification
 from notify_send import send_notification
 from notify_send import shorten_message
 
@@ -102,6 +105,26 @@ class TestsBase(unittest.TestCase):
         weechat = patcher.start()
         self.addCleanup(patcher.stop)
 
+        # Mock time.time().
+        patcher = mock.patch('notify_send.time.time')
+        self.time = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.time.return_value = 0.0
+
+        # Default values for config options.
+        set_config_option('notify_when_away', 'on')
+        set_config_option('notify_for_current_buffer', 'on')
+        set_config_option('min_notification_delay', '0')
+        set_config_option('ignore_nicks', '')
+        set_config_option('ignore_nicks_starting_with', '')
+        set_config_option('nick_separator', '')
+        set_config_option('escape_html', 'off')
+        set_config_option('max_length', '0')
+        set_config_option('ellipsis', '')
+        set_config_option('icon', '')
+        set_config_option('timeout', '0')
+        set_config_option('urgency', '')
+
 
 class DefaultValueOfTests(TestsBase):
     """Tests for default_value_of()."""
@@ -123,6 +146,47 @@ class NickFromPrefixTests(TestsBase):
         self.assertEqual(nick_from_prefix('+nick'), 'nick')
 
 
+class NotificationCBTests(TestsBase):
+    """Tests for notification_cb()."""
+
+    def setUp(self):
+        super(NotificationCBTests, self).setUp()
+
+        # Mock notification_should_be_sent().
+        patcher = mock.patch('notify_send.notification_should_be_sent')
+        self.notification_should_be_sent = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Mock send_notification().
+        patcher = mock.patch('notify_send.send_notification')
+        self.send_notification = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def notification_cb(self, data=None, buffer='buffer', date=None, tags=None,
+                        is_displayed=None, is_highlight='0', prefix='prefix',
+                        message='message'):
+        return notification_cb(data, buffer, date, tags, is_displayed,
+                               is_highlight, prefix, message)
+
+    def test_sends_notification_when_it_should_be_sent(self):
+        self.notification_should_be_sent.return_value = True
+
+        rc = self.notification_cb()
+
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertTrue(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_does_not_send_notification_when_it_should_not_be_sent(self):
+        self.notification_should_be_sent.return_value = False
+
+        rc = self.notification_cb()
+
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+
 class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
@@ -138,7 +202,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_highlight_in_current_buffer_and_option_is_off(self):
-        set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'off')
         BUFFER = 'buffer'
         weechat.current_buffer.return_value = BUFFER
@@ -148,8 +211,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_for_notification_from_self(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
         PREFIX = 'prefix'
@@ -163,8 +224,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_neither_private_message_or_highlight(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', '')
 
@@ -176,8 +235,6 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_nick_is_ignored(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
         set_config_option('ignore_nicks', 'nick')
@@ -188,9 +245,21 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
+    def test_returns_false_when_is_below_min_notification_delay(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '0.7'
+        )
+        set_config_option('min_notification_delay', 500)
+        self.time.return_value = 1.0
+
+        should_be_sent = self.notification_should_be_sent()
+
+        self.assertFalse(should_be_sent)
+
     def test_sends_notification_on_private_message(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
 
@@ -202,14 +271,64 @@ class NotificationShouldBeSentTests(TestsBase):
         self.assertTrue(should_be_sent)
 
     def test_sends_notification_on_highlight(self):
-        set_config_option('notify_when_away', 'on')
-        set_config_option('notify_for_current_buffer', 'on')
-
         should_be_sent = self.notification_should_be_sent(
             is_highlight=True
         )
 
         self.assertTrue(should_be_sent)
+
+
+class IsBelowMinNotificationDelayTests(TestsBase):
+    """Tests for is_below_min_notification_delay()."""
+
+    def test_returns_false_when_min_notification_delay_is_zero(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '1.0'
+        )
+        self.time.return_value = 1.0
+        set_config_option('min_notification_delay', 0)
+
+        self.assertFalse(is_below_min_notification_delay(BUFFER))
+
+    def test_returns_false_when_last_time_is_not_below_min_notification_delay(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '0.4'
+        )
+        self.time.return_value = 1.0
+        set_config_option('min_notification_delay', 500)
+
+        self.assertFalse(is_below_min_notification_delay(BUFFER))
+
+    def test_returns_true_when_last_time_is_below_min_notification_delay(self):
+        BUFFER = 'buffer'
+        set_buffer_string(
+            BUFFER,
+            'localvar_notify_send_last_notification_time',
+            '1.4'
+        )
+        self.time.return_value = 1.0
+        set_config_option('min_notification_delay', 500)
+
+        self.assertTrue(is_below_min_notification_delay(BUFFER))
+
+    def test_updates_last_notification_time(self):
+        CURRENT_TIME = 1.0
+        self.time.return_value = CURRENT_TIME
+        BUFFER = 'buffer'
+
+        is_below_min_notification_delay(BUFFER)
+
+        weechat.buffer_set.assert_called_once_with(
+            BUFFER,
+            'localvar_set_notify_send_last_notification_time',
+            str(CURRENT_TIME)
+        )
 
 
 class IgnoreNotificationsFromTests(TestsBase):
@@ -282,6 +401,103 @@ class EscapeSlashesTests(TestsBase):
         )
 
 
+class PrepareNotificationTests(TestsBase):
+    """Tests for prepare_notification()."""
+
+    def prepare_notification(self, buffer='buffer', is_highlight=False,
+                             nick='nick', message='message'):
+        return prepare_notification(buffer, is_highlight, nick, message)
+
+    def test_notification_has_correct_source_and_message_when_not_highlight(self):
+        NICK = 'nick'
+        MESSAGE = 'message'
+
+        notification = self.prepare_notification(
+            is_highlight=False,
+            nick=NICK,
+            message=MESSAGE
+        )
+
+        self.assertEqual(notification.source, NICK)
+        self.assertEqual(notification.message, MESSAGE)
+
+    def test_notification_has_correct_source_and_message_when_is_highlight(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', BUFFER)
+        set_config_option('nick_separator', ': ')
+        notification = self.prepare_notification(
+            buffer=BUFFER,
+            is_highlight=True,
+            nick='nick',
+            message='message'
+        )
+
+        self.assertEqual(notification.source, BUFFER)
+        self.assertEqual(notification.message, 'nick: message')
+
+    def test_notification_has_correct_icon(self):
+        ICON = '/path/to/icon.png'
+        set_config_option('icon', ICON)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.icon, ICON)
+
+    def test_notification_has_correct_timeout(self):
+        TIMEOUT = 1000
+        set_config_option('timeout', TIMEOUT)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.timeout, TIMEOUT)
+
+    def test_notification_has_correct_urgency(self):
+        URGENCY = 'critical'
+        set_config_option('urgency', URGENCY)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.urgency, URGENCY)
+
+    def test_shortens_message_when_max_length_is_non_zero_and_message_is_long(self):
+        set_config_option('max_length', 10)
+        set_config_option('ellipsis', '[..]')
+
+        notification = self.prepare_notification(message='123456789abcd')
+
+        self.assertEqual(notification.message, '123456[..]')
+
+    def test_does_not_shorten_message_when_max_length_zero(self):
+        set_config_option('max_length', 0)
+        MESSAGE = '123456789'
+
+        notification = self.prepare_notification(message=MESSAGE)
+
+        self.assertEqual(notification.message, MESSAGE)
+
+    def test_does_not_shorten_message_when_message_is_short_enough(self):
+        set_config_option('max_length', 10)
+        MESSAGE = 10 * 'a'
+
+        notification = self.prepare_notification(message=MESSAGE)
+
+        self.assertEqual(notification.message, MESSAGE)
+
+    def test_escapes_html_when_escape_html_is_on(self):
+        set_config_option('escape_html', 'on')
+
+        notification = self.prepare_notification(message='<>')
+
+        self.assertEqual(notification.message, '&lt;&gt;')
+
+    def test_does_not_escape_html_when_escape_html_is_off(self):
+        set_config_option('escape_html', 'off')
+
+        notification = self.prepare_notification(message='<>')
+
+        self.assertEqual(notification.message, '<>')
+
+
 class NickSeparatorTests(TestsBase):
     """Tests for nick_separator()."""
 
@@ -342,6 +558,8 @@ class SendNotificationTests(TestsBase):
     """Tests for send_notification()."""
 
     def setUp(self):
+        super(SendNotificationTests, self).setUp()
+
         # Mock subprocess.
         patcher = mock.patch('notify_send.subprocess')
         self.subprocess = patcher.start()

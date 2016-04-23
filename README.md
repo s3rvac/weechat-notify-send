@@ -38,6 +38,10 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 * `notify_when_away`: Send also notifications when away. Default: `on`.
 * `notify_for_current_buffer`: Send also notifications for the currently active
   buffer. Default: `on`.
+* `min_notification_delay`. A minimal delay in milliseconds between successive
+  notifications from the same buffer. It is used to protect from floods/spam.
+  Set it to `0` to disable this feature (i.e. all notifications will be shown).
+  Default: `500` milliseconds.
 * `ignore_nicks`: A comma-separated list of nicks from which no notifications
   should be shown. Default: `''`.
 * `ignore_nicks_starting_with`: A comma-separated list of nick prefixes from
@@ -60,7 +64,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 License
 -------
 
-Copyright (c) 2015 Petr Zemek (s3rvac@gmail.com) and contributors.
+Copyright (c) 2015-2016 Petr Zemek (s3rvac@gmail.com) and contributors.
 
 Distributed under the MIT license. See the
 [`LICENSE`](https://github.com/s3rvac/weechat-notify-send/blob/master/LICENSE)

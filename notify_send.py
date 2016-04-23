@@ -6,7 +6,7 @@
 #              notify-send. Requires libnotify.
 # License:     MIT (see below)
 #
-# Copyright (c) 2015 by Petr Zemek <s3rvac@gmail.com> and contributors
+# Copyright (c) 2015-2016 by Petr Zemek <s3rvac@gmail.com> and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 
 # Ensure that we are running under weechat.
@@ -72,6 +73,11 @@ SETTINGS = {
     'notify_for_current_buffer': (
         'on',
         'Send also notifications for the currently active buffer.'
+    ),
+    'min_notification_delay': (
+        '500',
+        'A minimal delay between successive notifications from the same '
+        'buffer (in milliseconds; set to 0 to show all notifications).'
     ),
     'ignore_nicks': (
         '',
@@ -158,6 +164,16 @@ def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
 
 def notification_should_be_sent(buffer, nick, is_highlight):
     """Should a notification be sent?"""
+    if notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
+        # The following function should be called only when the notification
+        # should be sent (it updates the last notification time).
+        if not is_below_min_notification_delay(buffer):
+            return True
+    return False
+
+
+def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
+    """Should a notification be sent when not considering time?"""
     if buffer == weechat.current_buffer():
         if not notify_for_current_buffer():
             return False
@@ -180,6 +196,57 @@ def notification_should_be_sent(buffer, nick, is_highlight):
 
     # We send notifications only for private messages or highlights.
     return False
+
+
+def is_below_min_notification_delay(buffer):
+    """Is a notification in the given buffer below the minimal delay between
+    successive notifications from the same buffer?
+
+    When called, this function updates the time of the last notification.
+    """
+    # We store the time of the last notification in a buffer-local variable to
+    # make it persistent over the lifetime of this plugin.
+    LAST_NOTIFICATION_TIME_VAR = 'notify_send_last_notification_time'
+    last_notification_time = buffer_get_float(
+        buffer,
+        'localvar_' + LAST_NOTIFICATION_TIME_VAR
+    )
+
+    min_notification_delay = weechat.config_get_plugin('min_notification_delay')
+    # min_notification_delay is in milliseconds (str). To compare it with
+    # last_notification_time (float in seconds), we have to convert it to
+    # seconds (float).
+    min_notification_delay = float(min_notification_delay) / 1000
+
+    current_time = time.time()
+
+    # We have to update the last notification time before returning the result.
+    buffer_set_float(
+        buffer,
+        'localvar_set_' + LAST_NOTIFICATION_TIME_VAR,
+        current_time
+    )
+
+    return (min_notification_delay > 0 and
+            current_time - last_notification_time < min_notification_delay)
+
+
+def buffer_get_float(buffer, property):
+    """A variant of weechat.buffer_get_x() for floats.
+
+    This variant is needed because WeeChat supports only buffer_get_string()
+    and buffer_get_int().
+    """
+    value = weechat.buffer_get_string(buffer, property)
+    return float(value) if value else 0.0
+
+
+def buffer_set_float(buffer, property, value):
+    """A variant of weechat.buffer_set() for floats.
+
+    This variant is needed because WeeChat supports only integers and strings.
+    """
+    weechat.buffer_set(buffer, property, str(value))
 
 
 def notify_for_current_buffer():
