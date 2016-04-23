@@ -2,6 +2,7 @@ weechat-notify-send
 ===================
 
 [![Build Status](https://travis-ci.org/s3rvac/weechat-notify-send.svg?branch=master)](https://travis-ci.org/s3rvac/weechat-notify-send)
+[![Coverage Status](https://coveralls.io/repos/github/s3rvac/weechat-notify-send/badge.svg?branch=master)](https://coveralls.io/github/s3rvac/weechat-notify-send?branch=master)
 
 A [WeeChat](https://weechat.org/) plugin that sends highlight and
 private-message notifications through
