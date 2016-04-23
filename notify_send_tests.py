@@ -559,6 +559,8 @@ class SendNotificationTests(TestsBase):
     """Tests for send_notification()."""
 
     def setUp(self):
+        super().setUp()
+
         # Mock subprocess.
         patcher = mock.patch('notify_send.subprocess')
         self.subprocess = patcher.start()
