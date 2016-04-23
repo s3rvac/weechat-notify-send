@@ -12,7 +12,7 @@ the `notify-send` application.
 
 A sample screenshot:
 
-![Screenshot](screenshot.png "title")
+![Screenshot](screenshot.png "A sample screenshot.")
 
 Note that the precise appearance depends on the configuration of your
 notification system as well as on the used icon.
