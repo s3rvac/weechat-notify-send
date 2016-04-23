@@ -1,6 +1,8 @@
 weechat-notify-send
 ===================
 
+[![Build Status](https://travis-ci.org/s3rvac/weechat-notify-send.svg?branch=master)](https://travis-ci.org/s3rvac/weechat-notify-send)
+
 A [WeeChat](https://weechat.org/) plugin that sends highlight and
 private-message notifications through
 [notify-send](http://manpages.ubuntu.com/manpages/vivid/man1/notify-send.1.html).
