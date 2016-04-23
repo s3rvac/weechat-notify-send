@@ -48,6 +48,7 @@ from notify_send import ignore_notifications_from
 from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
+from notify_send import notification_cb
 from notify_send import notification_should_be_sent
 from notify_send import prepare_notification
 from notify_send import send_notification
@@ -129,6 +130,47 @@ class NickFromPrefixTests(TestsBase):
 
     def test_returns_correct_value_when_prefix_is_nick_with_voice(self):
         self.assertEqual(nick_from_prefix('+nick'), 'nick')
+
+
+class NotificationCBTests(TestsBase):
+    """Tests for notification_cb()."""
+
+    def setUp(self):
+        super().setUp()
+
+        # Mock notification_should_be_sent().
+        patcher = mock.patch('notify_send.notification_should_be_sent')
+        self.notification_should_be_sent = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Mock send_notification().
+        patcher = mock.patch('notify_send.send_notification')
+        self.send_notification = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def notification_cb(self, data=None, buffer='buffer', date=None, tags=None,
+                        is_displayed=None, is_highlight='0', prefix='prefix',
+                        message='message'):
+        return notification_cb(data, buffer, date, tags, is_displayed,
+                               is_highlight, prefix, message)
+
+    def test_sends_notification_when_it_should_be_sent(self):
+        self.notification_should_be_sent.return_value = True
+
+        rc = self.notification_cb()
+
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertTrue(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_does_not_send_notification_when_it_should_not_be_sent(self):
+        self.notification_should_be_sent.return_value = False
+
+        rc = self.notification_cb()
+
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
 
 
 class NotificationShouldBeSentTests(TestsBase):
