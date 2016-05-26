@@ -4,7 +4,8 @@ Changelog
 dev
 ---
 
-* -
+* Show default values of options in their descriptions (e.g. when viewed via
+  `iset.pl`).
 
 0.4 (2016-04-23)
 ----------------

@@ -145,6 +145,15 @@ def default_value_of(option):
     return OPTIONS[option][0]
 
 
+def add_default_value_to(description, default_value):
+    """Adds the given default value to the given option description."""
+    # All descriptions end with a period, so do not add another period.
+    return '{} Default: {}.'.format(
+        description,
+        default_value if default_value else '""'
+    )
+
+
 def nick_from_prefix(prefix):
     """Returns a nick from the given prefix.
 
@@ -423,6 +432,7 @@ if __name__ == '__main__':
 
     # Initialization.
     for option, (default_value, description) in OPTIONS.items():
+        description = add_default_value_to(description, default_value)
         weechat.config_set_desc_plugin(option, description)
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)

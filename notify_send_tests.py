@@ -41,6 +41,7 @@ weechat = mock.Mock()
 sys.modules['weechat'] = weechat
 
 from notify_send import Notification
+from notify_send import add_default_value_to
 from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
@@ -133,6 +134,20 @@ class DefaultValueOfTests(TestsBase):
 
     def test_returns_correct_value(self):
         self.assertEqual(default_value_of('nick_separator'), ': ')
+
+
+class AddDefaultValueToTests(TestsBase):
+    """Tests for add_default_value_to()."""
+
+    def test_adds_correct_default_value_when_default_value_is_nonempty(self):
+        description = add_default_value_to('Option description.', 'on')
+
+        self.assertEqual(description, 'Option description. Default: on.')
+
+    def test_adds_correct_default_value_when_default_value_is_empty(self):
+        description = add_default_value_to('Option description.', '')
+
+        self.assertEqual(description, 'Option description. Default: "".')
 
 
 class NickFromPrefixTests(TestsBase):
