@@ -464,7 +464,7 @@ class PrepareNotificationTests(TestsBase):
 
     def test_notification_has_correct_source_and_message_when_is_highlight(self):
         BUFFER = 'buffer'
-        set_buffer_string(BUFFER, 'name', BUFFER)
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('nick_separator', ': ')
         notification = self.prepare_notification(
             buffer=BUFFER,
@@ -473,7 +473,7 @@ class PrepareNotificationTests(TestsBase):
             message='message'
         )
 
-        self.assertEqual(notification.source, BUFFER)
+        self.assertEqual(notification.source, '#buffer')
         self.assertEqual(notification.message, 'nick: message')
 
     def test_notification_has_correct_icon(self):
