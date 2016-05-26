@@ -45,7 +45,7 @@ from notify_send import add_default_value_to
 from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
-from notify_send import ignore_notifications_from
+from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
@@ -372,54 +372,54 @@ class IsBelowMinNotificationDelayTests(TestsBase):
         )
 
 
-class IgnoreNotificationsFromTests(TestsBase):
-    """Tests for ignore_notifications_from()."""
+class IgnoreNotificationsFromNickTests(TestsBase):
+    """Tests for ignore_notifications_from_nick()."""
 
     def test_returns_false_when_nothing_is_ignored(self):
         set_config_option('ignore_nicks', '')
         set_config_option('ignore_nicks_starting_with', '')
 
-        self.assertFalse(ignore_notifications_from('nick'))
+        self.assertFalse(ignore_notifications_from_nick('nick'))
 
     def test_returns_false_when_nick_is_not_between_ignored(self):
         set_config_option('ignore_nicks', 'nick1,nick2,nick3')
 
-        self.assertFalse(ignore_notifications_from('wizard'))
+        self.assertFalse(ignore_notifications_from_nick('wizard'))
 
     def test_returns_true_when_nick_is_ignored(self):
         set_config_option('ignore_nicks', 'nick')
 
-        self.assertTrue(ignore_notifications_from('nick'))
+        self.assertTrue(ignore_notifications_from_nick('nick'))
 
     def test_returns_true_when_nick_is_between_ignored(self):
         set_config_option('ignore_nicks', 'nick1,nick2,nick3')
 
-        self.assertTrue(ignore_notifications_from('nick2'))
+        self.assertTrue(ignore_notifications_from_nick('nick2'))
 
     def test_strips_beginning_and_trailing_whitespace_from_ignored_nicks(self):
         set_config_option('ignore_nicks', '  nick  ')
 
-        self.assertTrue(ignore_notifications_from('nick'))
+        self.assertTrue(ignore_notifications_from_nick('nick'))
 
     def test_returns_false_when_nick_is_not_prefixed_with_ignored_prefix(self):
         set_config_option('ignore_nicks_starting_with', 'pre_')
 
-        self.assertFalse(ignore_notifications_from('nick'))
+        self.assertFalse(ignore_notifications_from_nick('nick'))
 
     def test_returns_true_when_nick_is_prefixed_with_ignored_prefix(self):
         set_config_option('ignore_nicks_starting_with', 'pre_')
 
-        self.assertTrue(ignore_notifications_from('pre_nick'))
+        self.assertTrue(ignore_notifications_from_nick('pre_nick'))
 
     def test_returns_true_when_nick_is_prefixed_with_prefix_between_ignored_prefixes(self):
         set_config_option('ignore_nicks_starting_with', 'pre1_,pre2_,pre3_')
 
-        self.assertTrue(ignore_notifications_from('pre2_nick'))
+        self.assertTrue(ignore_notifications_from_nick('pre2_nick'))
 
     def test_strips_beginning_and_trailing_whitespace_from_ignored_prefixes(self):
         set_config_option('ignore_nicks_starting_with', '  pre_  ')
 
-        self.assertTrue(ignore_notifications_from('pre_nick'))
+        self.assertTrue(ignore_notifications_from_nick('pre_nick'))
 
 
 class EscapeHtmlTests(TestsBase):

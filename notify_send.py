@@ -199,7 +199,7 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
         if not notify_when_away():
             return False
 
-    if ignore_notifications_from(nick):
+    if ignore_notifications_from_nick(nick):
         return False
 
     if is_private_message(buffer):
@@ -301,7 +301,7 @@ def i_am_author_of_message(buffer, nick):
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
 
 
-def ignore_notifications_from(nick):
+def ignore_notifications_from_nick(nick):
     """Should notifications from the given nick be ignored?"""
     if nick in ignored_nicks():
         return True
