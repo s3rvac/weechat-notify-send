@@ -34,7 +34,7 @@ import sys
 import time
 
 
-# Ensure that we are running under weechat.
+# Ensure that we are running under WeeChat.
 try:
     import weechat
 except ImportError:
@@ -49,7 +49,7 @@ SCRIPT_NAME = 'notify_send'
 SCRIPT_AUTHOR = 's3rvac'
 
 # Version of the script.
-SCRIPT_VERSION = '0.4'
+SCRIPT_VERSION = '0.5'
 
 # License under which the script is distributed.
 SCRIPT_LICENSE = 'MIT'
@@ -86,6 +86,16 @@ OPTIONS = {
         '500',
         'A minimal delay between successive notifications from the same '
         'buffer (in milliseconds; set to 0 to show all notifications).'
+    ),
+    'ignore_buffers': (
+        '',
+        'A comma-separated list of buffers from which no notifications should '
+        'be shown.'
+    ),
+    'ignore_buffers_starting_with': (
+        '',
+        'A comma-separated list of buffer prefixes from which no '
+        'notifications should be shown.'
     ),
     'ignore_nicks': (
         '',
@@ -145,6 +155,15 @@ def default_value_of(option):
     return OPTIONS[option][0]
 
 
+def add_default_value_to(description, default_value):
+    """Adds the given default value to the given option description."""
+    # All descriptions end with a period, so do not add another period.
+    return '{} Default: {}.'.format(
+        description,
+        default_value if default_value else '""'
+    )
+
+
 def nick_from_prefix(prefix):
     """Returns a nick from the given prefix.
 
@@ -190,7 +209,10 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
         if not notify_when_away():
             return False
 
-    if ignore_notifications_from(nick):
+    if ignore_notifications_from_nick(nick):
+        return False
+
+    if ignore_notifications_from_buffer(buffer):
         return False
 
     if is_private_message(buffer):
@@ -292,7 +314,44 @@ def i_am_author_of_message(buffer, nick):
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
 
 
-def ignore_notifications_from(nick):
+def ignore_notifications_from_buffer(buffer):
+    """Should notifications from the given buffer be ignored?"""
+    # The 'buffer' parameter is actually the buffer's ID (e.g. '0x2719cf0'). We
+    # have to check its name (e.g. 'freenode.#weechat') and short name (e.g.
+    # '#weechat').
+    buffer_names = [
+        weechat.buffer_get_string(buffer, 'short_name'),
+        weechat.buffer_get_string(buffer, 'name')
+    ]
+
+    for buffer_name in buffer_names:
+        if buffer_name and buffer_name in ignored_buffers():
+            return True
+
+    for buffer_name in buffer_names:
+        for prefix in ignored_buffer_prefixes():
+            if prefix and buffer_name and buffer_name.startswith(prefix):
+                return True
+
+    return False
+
+
+def ignored_buffers():
+    """A generator of buffers from which notifications should be ignored."""
+    for buffer in weechat.config_get_plugin('ignore_buffers').split(','):
+        yield buffer.strip()
+
+
+def ignored_buffer_prefixes():
+    """A generator of buffer prefixes from which notifications should be
+    ignored.
+    """
+    prefixes = weechat.config_get_plugin('ignore_buffers_starting_with')
+    for prefix in prefixes.split(','):
+        yield prefix.strip()
+
+
+def ignore_notifications_from_nick(nick):
     """Should notifications from the given nick be ignored?"""
     if nick in ignored_nicks():
         return True
@@ -423,6 +482,7 @@ if __name__ == '__main__':
 
     # Initialization.
     for option, (default_value, description) in OPTIONS.items():
+        description = add_default_value_to(description, default_value)
         weechat.config_set_desc_plugin(option, description)
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)

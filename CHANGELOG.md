@@ -6,6 +6,16 @@ dev
 
 * -
 
+0.5 (2016-05-27)
+----------------
+
+* Added a new option: `ignore_buffers`. It is a comma-separated list of buffers
+  from which no notifications should be shown.
+* Added a new option: `ignore_buffers_starting_with`. It is a comma-separated
+  list of buffer prefixes from which no notifications should be shown.
+* Show default values of options in their descriptions (e.g. when viewed via
+  `iset.pl`).
+
 0.4 (2016-04-23)
 ----------------
 

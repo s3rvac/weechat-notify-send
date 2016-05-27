@@ -41,10 +41,12 @@ weechat = mock.Mock()
 sys.modules['weechat'] = weechat
 
 from notify_send import Notification
+from notify_send import add_default_value_to
 from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
-from notify_send import ignore_notifications_from
+from notify_send import ignore_notifications_from_nick
+from notify_send import ignore_notifications_from_buffer
 from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
@@ -117,6 +119,8 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('min_notification_delay', '0')
+        set_config_option('ignore_buffers', '')
+        set_config_option('ignore_buffers_starting_with', '')
         set_config_option('ignore_nicks', '')
         set_config_option('ignore_nicks_starting_with', '')
         set_config_option('nick_separator', '')
@@ -127,12 +131,30 @@ class TestsBase(unittest.TestCase):
         set_config_option('timeout', '0')
         set_config_option('urgency', '')
 
+        # Mimic the behavior of weechat.buffer_get_string() by returning the
+        # empty string by default.
+        weechat.buffer_get_string.side_effect = lambda buffer, string: ''
+
 
 class DefaultValueOfTests(TestsBase):
     """Tests for default_value_of()."""
 
     def test_returns_correct_value(self):
         self.assertEqual(default_value_of('nick_separator'), ': ')
+
+
+class AddDefaultValueToTests(TestsBase):
+    """Tests for add_default_value_to()."""
+
+    def test_adds_correct_default_value_when_default_value_is_nonempty(self):
+        description = add_default_value_to('Option description.', 'on')
+
+        self.assertEqual(description, 'Option description. Default: on.')
+
+    def test_adds_correct_default_value_when_default_value_is_empty(self):
+        description = add_default_value_to('Option description.', '')
+
+        self.assertEqual(description, 'Option description. Default: "".')
 
 
 class NickFromPrefixTests(TestsBase):
@@ -197,9 +219,11 @@ class NotificationShouldBeSentTests(TestsBase):
         return notification_should_be_sent(buffer, prefix, is_highlight)
 
     def test_returns_false_when_away_and_option_is_off(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_away', 'away')
         set_config_option('notify_when_away', 'off')
 
-        should_be_sent = self.notification_should_be_sent()
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
 
@@ -232,6 +256,18 @@ class NotificationShouldBeSentTests(TestsBase):
         should_be_sent = self.notification_should_be_sent(
             buffer=BUFFER,
             is_highlight=False
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_false_when_buffer_is_ignored(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '#buffer')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=True
         )
 
         self.assertFalse(should_be_sent)
@@ -357,54 +393,156 @@ class IsBelowMinNotificationDelayTests(TestsBase):
         )
 
 
-class IgnoreNotificationsFromTests(TestsBase):
-    """Tests for ignore_notifications_from()."""
+class IgnoreNotificationsFromBufferTests(TestsBase):
+    """Tests for ignore_notifications_from_buffer()."""
+
+    def test_returns_false_when_nothing_is_ignored(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '')
+        set_config_option('ignore_buffers_starting_with', '')
+
+        self.assertFalse(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_has_no_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', '')
+        set_buffer_string(BUFFER, 'short_name', '')
+        set_config_option('ignore_buffers', '')
+        set_config_option('ignore_buffers_starting_with', '')
+
+        self.assertFalse(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_is_not_between_ignored(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '#buffer1,#buffer2,#buffer3')
+
+        self.assertFalse(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_is_ignored_by_short_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '#buffer')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_is_ignored_by_full_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', 'network.#buffer')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_is_between_ignored_by_short_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '#aaa,#buffer,#bbb')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_is_between_ignored_by_full_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '#aaa,network.#buffer,#bbb')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_strips_beginning_and_trailing_whitespace_from_ignored_buffers(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers', '  #buffer  ')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_is_not_prefixed_with_ignored_prefix(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers_starting_with', 'some_prefix')
+
+        self.assertFalse(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_full_name_is_prefixed_with_ignored_prefix(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers_starting_with', '#aaa,network.,#bbb')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_short_name_is_prefixed_with_ignored_prefix(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers_starting_with', '#aaa,#buf,#bbb')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+    def test_strips_beginning_and_trailing_whitespace_from_ignored_prefixes(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('ignore_buffers_starting_with', '  network.  ')
+
+        self.assertTrue(ignore_notifications_from_buffer(BUFFER))
+
+
+class IgnoreNotificationsFromNickTests(TestsBase):
+    """Tests for ignore_notifications_from_nick()."""
 
     def test_returns_false_when_nothing_is_ignored(self):
         set_config_option('ignore_nicks', '')
         set_config_option('ignore_nicks_starting_with', '')
 
-        self.assertFalse(ignore_notifications_from('nick'))
+        self.assertFalse(ignore_notifications_from_nick('nick'))
 
     def test_returns_false_when_nick_is_not_between_ignored(self):
         set_config_option('ignore_nicks', 'nick1,nick2,nick3')
 
-        self.assertFalse(ignore_notifications_from('wizard'))
+        self.assertFalse(ignore_notifications_from_nick('wizard'))
 
     def test_returns_true_when_nick_is_ignored(self):
         set_config_option('ignore_nicks', 'nick')
 
-        self.assertTrue(ignore_notifications_from('nick'))
+        self.assertTrue(ignore_notifications_from_nick('nick'))
 
     def test_returns_true_when_nick_is_between_ignored(self):
         set_config_option('ignore_nicks', 'nick1,nick2,nick3')
 
-        self.assertTrue(ignore_notifications_from('nick2'))
+        self.assertTrue(ignore_notifications_from_nick('nick2'))
 
     def test_strips_beginning_and_trailing_whitespace_from_ignored_nicks(self):
         set_config_option('ignore_nicks', '  nick  ')
 
-        self.assertTrue(ignore_notifications_from('nick'))
+        self.assertTrue(ignore_notifications_from_nick('nick'))
 
     def test_returns_false_when_nick_is_not_prefixed_with_ignored_prefix(self):
         set_config_option('ignore_nicks_starting_with', 'pre_')
 
-        self.assertFalse(ignore_notifications_from('nick'))
+        self.assertFalse(ignore_notifications_from_nick('nick'))
 
     def test_returns_true_when_nick_is_prefixed_with_ignored_prefix(self):
         set_config_option('ignore_nicks_starting_with', 'pre_')
 
-        self.assertTrue(ignore_notifications_from('pre_nick'))
+        self.assertTrue(ignore_notifications_from_nick('pre_nick'))
 
     def test_returns_true_when_nick_is_prefixed_with_prefix_between_ignored_prefixes(self):
         set_config_option('ignore_nicks_starting_with', 'pre1_,pre2_,pre3_')
 
-        self.assertTrue(ignore_notifications_from('pre2_nick'))
+        self.assertTrue(ignore_notifications_from_nick('pre2_nick'))
 
     def test_strips_beginning_and_trailing_whitespace_from_ignored_prefixes(self):
         set_config_option('ignore_nicks_starting_with', '  pre_  ')
 
-        self.assertTrue(ignore_notifications_from('pre_nick'))
+        self.assertTrue(ignore_notifications_from_nick('pre_nick'))
 
 
 class EscapeHtmlTests(TestsBase):
@@ -449,7 +587,7 @@ class PrepareNotificationTests(TestsBase):
 
     def test_notification_has_correct_source_and_message_when_is_highlight(self):
         BUFFER = 'buffer'
-        set_buffer_string(BUFFER, 'name', BUFFER)
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('nick_separator', ': ')
         notification = self.prepare_notification(
             buffer=BUFFER,
@@ -458,7 +596,7 @@ class PrepareNotificationTests(TestsBase):
             message='message'
         )
 
-        self.assertEqual(notification.source, BUFFER)
+        self.assertEqual(notification.source, '#buffer')
         self.assertEqual(notification.message, 'nick: message')
 
     def test_notification_has_correct_icon(self):
