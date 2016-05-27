@@ -2,6 +2,6 @@
 __pycache__
 *.py[co]
 
-# Unit tests and coverage reports
+# Code coverage settings and reports
 /.coverage
 /coverage
