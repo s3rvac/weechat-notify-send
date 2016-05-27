@@ -87,6 +87,16 @@ OPTIONS = {
         'A minimal delay between successive notifications from the same '
         'buffer (in milliseconds; set to 0 to show all notifications).'
     ),
+    'ignore_buffers': (
+        '',
+        'A comma-separated list of buffers from which no notifications should '
+        'be shown.'
+    ),
+    'ignore_buffers_starting_with': (
+        '',
+        'A comma-separated list of buffer prefixes from which no '
+        'notifications should be shown.'
+    ),
     'ignore_nicks': (
         '',
         'A comma-separated list of nicks from which no notifications should '
@@ -202,6 +212,9 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
     if ignore_notifications_from_nick(nick):
         return False
 
+    if ignore_notifications_from_buffer(buffer):
+        return False
+
     if is_private_message(buffer):
         if i_am_author_of_message(buffer, nick):
             # Do not send notifications from myself.
@@ -299,6 +312,43 @@ def is_private_message(buffer):
 def i_am_author_of_message(buffer, nick):
     """Am I (the current WeeChat user) the author of the message?"""
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
+
+
+def ignore_notifications_from_buffer(buffer):
+    """Should notifications from the given buffer be ignored?"""
+    # The 'buffer' parameter is actually the buffer's ID (e.g. '0x2719cf0'). We
+    # have to check its name (e.g. 'freenode.#weechat') and short name (e.g.
+    # '#weechat').
+    buffer_names = [
+        weechat.buffer_get_string(buffer, 'short_name'),
+        weechat.buffer_get_string(buffer, 'name')
+    ]
+
+    for buffer_name in buffer_names:
+        if buffer_name and buffer_name in ignored_buffers():
+            return True
+
+    for buffer_name in buffer_names:
+        for prefix in ignored_buffer_prefixes():
+            if prefix and buffer_name and buffer_name.startswith(prefix):
+                return True
+
+    return False
+
+
+def ignored_buffers():
+    """A generator of buffers from which notifications should be ignored."""
+    for buffer in weechat.config_get_plugin('ignore_buffers').split(','):
+        yield buffer.strip()
+
+
+def ignored_buffer_prefixes():
+    """A generator of buffer prefixes from which notifications should be
+    ignored.
+    """
+    prefixes = weechat.config_get_plugin('ignore_buffers_starting_with')
+    for prefix in prefixes.split(','):
+        yield prefix.strip()
 
 
 def ignore_notifications_from_nick(nick):
