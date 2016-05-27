@@ -4,6 +4,11 @@ Changelog
 dev
 ---
 
+* -
+
+0.5 (2016-05-27)
+----------------
+
 * Added a new option: `ignore_buffers`. It is a comma-separated list of buffers
   from which no notifications should be shown.
 * Added a new option: `ignore_buffers_starting_with`. It is a comma-separated
