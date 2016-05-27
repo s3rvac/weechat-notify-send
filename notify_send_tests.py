@@ -45,8 +45,8 @@ from notify_send import add_default_value_to
 from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
-from notify_send import ignore_notifications_from_nick
 from notify_send import ignore_notifications_from_buffer
+from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
