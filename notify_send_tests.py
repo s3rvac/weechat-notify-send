@@ -128,6 +128,10 @@ class TestsBase(unittest.TestCase):
         set_config_option('timeout', '0')
         set_config_option('urgency', '')
 
+        # Mimic the behavior of weechat.buffer_get_string() by returning the
+        # empty string by default.
+        weechat.buffer_get_string.side_effect = lambda buffer, string: ''
+
 
 class DefaultValueOfTests(TestsBase):
     """Tests for default_value_of()."""
@@ -212,9 +216,11 @@ class NotificationShouldBeSentTests(TestsBase):
         return notification_should_be_sent(buffer, prefix, is_highlight)
 
     def test_returns_false_when_away_and_option_is_off(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_away', 'away')
         set_config_option('notify_when_away', 'off')
 
-        should_be_sent = self.notification_should_be_sent()
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
 
