@@ -34,7 +34,7 @@ import sys
 import time
 
 
-# Ensure that we are running under weechat.
+# Ensure that we are running under WeeChat.
 try:
     import weechat
 except ImportError:
