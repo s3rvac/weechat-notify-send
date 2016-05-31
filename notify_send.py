@@ -38,7 +38,7 @@ import time
 try:
     import weechat
 except ImportError:
-    print('This script has to run under WeeChat (http://www.weechat.org/).')
+    print('This script has to run under WeeChat (https://weechat.org/).')
     sys.exit(1)
 
 
