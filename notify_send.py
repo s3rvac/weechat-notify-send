@@ -503,5 +503,6 @@ if __name__ == '__main__':
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)
 
-    # Catch all messages, on all buffers, without color.
+    # Catch all messages on all buffers and strip colors from them before
+    # passing them into the callback.
     weechat.hook_print('', '', '', 1, 'message_printed_callback', '')
