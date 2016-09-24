@@ -328,7 +328,7 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertTrue(should_be_sent)
 
-    def test_returns_true_on_private_message_when_notify_on_privmsgs_is_off(self):
+    def test_returns_false_on_private_message_when_notify_on_privmsgs_is_off(self):
         set_config_option('notify_on_privmsgs', 'off')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
