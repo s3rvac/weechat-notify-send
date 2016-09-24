@@ -486,4 +486,6 @@ if __name__ == '__main__':
         weechat.config_set_desc_plugin(option, description)
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)
+
+    # Catch all messages tagged 'irc_privmsg', on all buffers, without color.
     weechat.hook_print('', 'irc_privmsg', '', 1, 'notification_cb', '')
