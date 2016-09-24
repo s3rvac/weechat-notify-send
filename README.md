@@ -38,6 +38,8 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 
 * `notify_on_highlights`. Send notifications on highlights. Default: `on`.
 * `notify_on_privmsgs`. Send notifications on private messages. Default: `on`.
+* `notify_on_filtered_messages`. Send notifications also on filtered (hidden)
+  messages. Default: `off`.
 * `notify_when_away`: Send also notifications when away. Default: `on`.
 * `notify_for_current_buffer`: Send also notifications for the currently active
   buffer. Default: `on`.

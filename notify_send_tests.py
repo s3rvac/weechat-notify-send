@@ -116,6 +116,7 @@ class TestsBase(unittest.TestCase):
         # Default values for config options.
         set_config_option('notify_on_highlights', 'on')
         set_config_option('notify_on_privmsgs', 'on')
+        set_config_option('notify_on_filtered_messages', 'off')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('min_notification_delay', '0')
@@ -218,15 +219,23 @@ class NotificationShouldBeSentTests(TestsBase):
                                     is_displayed=True, is_highlight=True):
         return notification_should_be_sent(buffer, prefix, is_displayed, is_highlight)
 
-    def test_returns_false_when_message_is_not_displayed(self):
-        BUFFER = 'buffer'
+    def test_returns_false_when_message_is_filtered_and_option_is_off(self):
+        set_config_option('notify_on_filtered_messages', 'off')
 
         should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_displayed=False
+            is_displayed=False  # WeeChat marks filtered messages as not displayed.
         )
 
         self.assertFalse(should_be_sent)
+
+    def test_returns_true_when_message_is_not_filtered_and_option_is_on(self):
+        set_config_option('notify_on_filtered_messages', 'on')
+
+        should_be_sent = self.notification_should_be_sent(
+            is_displayed=False  # WeeChat marks filtered messages as not displayed.
+        )
+
+        self.assertTrue(should_be_sent)
 
     def test_returns_false_when_away_and_option_is_off(self):
         BUFFER = 'buffer'

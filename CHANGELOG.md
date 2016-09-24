@@ -4,7 +4,10 @@ Changelog
 dev
 ---
 
-* Do not notify on filtered (hidden) messages.
+* Do not notify on filtered (hidden) messages by default.
+* Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
+  can instruct the plugin to send notifications also for filtered (hidden)
+  messages.
 
 0.5 (2016-05-27)
 ----------------

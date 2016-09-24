@@ -74,6 +74,10 @@ OPTIONS = {
         'on',
         'Send notifications on private messages.'
     ),
+    'notify_on_filtered_messages': (
+        'off',
+        'Send notifications also on filtered (hidden) messages.'
+    ),
     'notify_when_away': (
         'on',
         'Send also notifications when away.'
@@ -205,7 +209,8 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
                                                   is_highlight):
     """Should a notification be sent when not considering time?"""
     if not is_displayed:
-        return False
+        if not notify_on_filtered_messages():
+            return False
 
     if buffer == weechat.current_buffer():
         if not notify_for_current_buffer():
@@ -298,6 +303,11 @@ def notify_on_highlights():
 def notify_on_privmsgs():
     """Should we send notifications on private messages?"""
     return weechat.config_get_plugin('notify_on_privmsgs') == 'on'
+
+
+def notify_on_filtered_messages():
+    """Should we also send notifications for filtered (hidden) messages?"""
+    return weechat.config_get_plugin('notify_on_filtered_messages') == 'on'
 
 
 def notify_when_away():
