@@ -178,9 +178,9 @@ def nick_from_prefix(prefix):
     return re.sub(r'^[@+](.*)', r'\1', prefix)
 
 
-def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
-                    prefix, message):
-    """A callback for notifications from WeeChat."""
+def message_printed_callback(data, buffer, date, tags, is_displayed,
+                             is_highlight, prefix, message):
+    """A callback when a message is printed."""
     is_displayed = int(is_displayed)
     is_highlight = int(is_highlight)
     nick = nick_from_prefix(prefix)
@@ -503,5 +503,5 @@ if __name__ == '__main__':
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)
 
-    # Catch all messages tagged 'irc_privmsg', on all buffers, without color.
-    weechat.hook_print('', 'irc_privmsg', '', 1, 'notification_cb', '')
+    # Catch all messages, on all buffers, without color.
+    weechat.hook_print('', '', '', 1, 'message_printed_callback', '')

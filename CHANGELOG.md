@@ -4,6 +4,8 @@ Changelog
 dev
 ---
 
+* All messages are now intercepted, not only those tagged with `irc_privmsg`.
+  This should make the plugin working also for networks other than IRC.
 * Do not notify on filtered (hidden) messages by default.
 * Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
   can instruct the plugin to send notifications also for filtered (hidden)

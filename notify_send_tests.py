@@ -48,9 +48,9 @@ from notify_send import escape_slashes
 from notify_send import ignore_notifications_from_buffer
 from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
+from notify_send import message_printed_callback
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
-from notify_send import notification_cb
 from notify_send import notification_should_be_sent
 from notify_send import prepare_notification
 from notify_send import send_notification
@@ -171,11 +171,11 @@ class NickFromPrefixTests(TestsBase):
         self.assertEqual(nick_from_prefix('+nick'), 'nick')
 
 
-class NotificationCBTests(TestsBase):
-    """Tests for notification_cb()."""
+class MessagePrintedCallbackTests(TestsBase):
+    """Tests for message_printed_callback()."""
 
     def setUp(self):
-        super(NotificationCBTests, self).setUp()
+        super(MessagePrintedCallbackTests, self).setUp()
 
         # Mock notification_should_be_sent().
         patcher = mock.patch('notify_send.notification_should_be_sent')
@@ -187,16 +187,16 @@ class NotificationCBTests(TestsBase):
         self.send_notification = patcher.start()
         self.addCleanup(patcher.stop)
 
-    def notification_cb(self, data=None, buffer='buffer', date=None, tags=None,
-                        is_displayed='1', is_highlight='0', prefix='prefix',
-                        message='message'):
-        return notification_cb(data, buffer, date, tags, is_displayed,
-                               is_highlight, prefix, message)
+    def message_printed_callback(self, data=None, buffer='buffer', date=None,
+                                 tags=None, is_displayed='1', is_highlight='0',
+                                 prefix='prefix', message='message'):
+        return message_printed_callback(data, buffer, date, tags, is_displayed,
+                                        is_highlight, prefix, message)
 
     def test_sends_notification_when_it_should_be_sent(self):
         self.notification_should_be_sent.return_value = True
 
-        rc = self.notification_cb()
+        rc = self.message_printed_callback()
 
         self.assertTrue(self.notification_should_be_sent.called)
         self.assertTrue(self.send_notification.called)
@@ -205,7 +205,7 @@ class NotificationCBTests(TestsBase):
     def test_does_not_send_notification_when_it_should_not_be_sent(self):
         self.notification_should_be_sent.return_value = False
 
-        rc = self.notification_cb()
+        rc = self.message_printed_callback()
 
         self.assertTrue(self.notification_should_be_sent.called)
         self.assertFalse(self.send_notification.called)
