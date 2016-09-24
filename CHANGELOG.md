@@ -4,7 +4,7 @@ Changelog
 dev
 ---
 
-* -
+* Do not notify on filtered (hidden) messages.
 
 0.5 (2016-05-27)
 ----------------

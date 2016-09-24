@@ -177,10 +177,11 @@ def nick_from_prefix(prefix):
 def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
                     prefix, message):
     """A callback for notifications from WeeChat."""
+    is_displayed = int(is_displayed)
     is_highlight = int(is_highlight)
     nick = nick_from_prefix(prefix)
 
-    if notification_should_be_sent(buffer, nick, is_highlight):
+    if notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
         notification = prepare_notification(
             buffer, is_highlight, nick, message
         )
@@ -189,9 +190,10 @@ def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
     return weechat.WEECHAT_RC_OK
 
 
-def notification_should_be_sent(buffer, nick, is_highlight):
+def notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
     """Should a notification be sent?"""
-    if notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
+    if notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
+                                                     is_highlight):
         # The following function should be called only when the notification
         # should be sent (it updates the last notification time).
         if not is_below_min_notification_delay(buffer):
@@ -199,8 +201,12 @@ def notification_should_be_sent(buffer, nick, is_highlight):
     return False
 
 
-def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
+def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
+                                                  is_highlight):
     """Should a notification be sent when not considering time?"""
+    if not is_displayed:
+        return False
+
     if buffer == weechat.current_buffer():
         if not notify_for_current_buffer():
             return False

@@ -187,7 +187,7 @@ class NotificationCBTests(TestsBase):
         self.addCleanup(patcher.stop)
 
     def notification_cb(self, data=None, buffer='buffer', date=None, tags=None,
-                        is_displayed=None, is_highlight='0', prefix='prefix',
+                        is_displayed='1', is_highlight='0', prefix='prefix',
                         message='message'):
         return notification_cb(data, buffer, date, tags, is_displayed,
                                is_highlight, prefix, message)
@@ -215,8 +215,18 @@ class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
     def notification_should_be_sent(self, buffer='buffer', prefix='prefix',
-                                    is_highlight=True):
-        return notification_should_be_sent(buffer, prefix, is_highlight)
+                                    is_displayed=True, is_highlight=True):
+        return notification_should_be_sent(buffer, prefix, is_displayed, is_highlight)
+
+    def test_returns_false_when_message_is_not_displayed(self):
+        BUFFER = 'buffer'
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_displayed=False
+        )
+
+        self.assertFalse(should_be_sent)
 
     def test_returns_false_when_away_and_option_is_off(self):
         BUFFER = 'buffer'
