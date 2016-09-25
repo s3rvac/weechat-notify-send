@@ -48,10 +48,12 @@ from notify_send import escape_slashes
 from notify_send import ignore_notifications_from_buffer
 from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
+from notify_send import message_printed_callback
+from notify_send import names_for_buffer
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
-from notify_send import notification_cb
 from notify_send import notification_should_be_sent
+from notify_send import notify_on_all_messages_in_buffer
 from notify_send import prepare_notification
 from notify_send import send_notification
 from notify_send import shorten_message
@@ -116,8 +118,10 @@ class TestsBase(unittest.TestCase):
         # Default values for config options.
         set_config_option('notify_on_highlights', 'on')
         set_config_option('notify_on_privmsgs', 'on')
+        set_config_option('notify_on_filtered_messages', 'off')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
+        set_config_option('notify_on_all_messages_in_buffers', '')
         set_config_option('min_notification_delay', '0')
         set_config_option('ignore_buffers', '')
         set_config_option('ignore_buffers_starting_with', '')
@@ -170,11 +174,11 @@ class NickFromPrefixTests(TestsBase):
         self.assertEqual(nick_from_prefix('+nick'), 'nick')
 
 
-class NotificationCBTests(TestsBase):
-    """Tests for notification_cb()."""
+class MessagePrintedCallbackTests(TestsBase):
+    """Tests for message_printed_callback()."""
 
     def setUp(self):
-        super(NotificationCBTests, self).setUp()
+        super(MessagePrintedCallbackTests, self).setUp()
 
         # Mock notification_should_be_sent().
         patcher = mock.patch('notify_send.notification_should_be_sent')
@@ -186,16 +190,16 @@ class NotificationCBTests(TestsBase):
         self.send_notification = patcher.start()
         self.addCleanup(patcher.stop)
 
-    def notification_cb(self, data=None, buffer='buffer', date=None, tags=None,
-                        is_displayed=None, is_highlight='0', prefix='prefix',
-                        message='message'):
-        return notification_cb(data, buffer, date, tags, is_displayed,
-                               is_highlight, prefix, message)
+    def message_printed_callback(self, data=None, buffer='buffer', date=None,
+                                 tags=None, is_displayed='1', is_highlight='0',
+                                 prefix='prefix', message='message'):
+        return message_printed_callback(data, buffer, date, tags, is_displayed,
+                                        is_highlight, prefix, message)
 
     def test_sends_notification_when_it_should_be_sent(self):
         self.notification_should_be_sent.return_value = True
 
-        rc = self.notification_cb()
+        rc = self.message_printed_callback()
 
         self.assertTrue(self.notification_should_be_sent.called)
         self.assertTrue(self.send_notification.called)
@@ -204,7 +208,7 @@ class NotificationCBTests(TestsBase):
     def test_does_not_send_notification_when_it_should_not_be_sent(self):
         self.notification_should_be_sent.return_value = False
 
-        rc = self.notification_cb()
+        rc = self.message_printed_callback()
 
         self.assertTrue(self.notification_should_be_sent.called)
         self.assertFalse(self.send_notification.called)
@@ -215,8 +219,26 @@ class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
     def notification_should_be_sent(self, buffer='buffer', prefix='prefix',
-                                    is_highlight=True):
-        return notification_should_be_sent(buffer, prefix, is_highlight)
+                                    is_displayed=True, is_highlight=True):
+        return notification_should_be_sent(buffer, prefix, is_displayed, is_highlight)
+
+    def test_returns_false_when_message_is_filtered_and_option_is_off(self):
+        set_config_option('notify_on_filtered_messages', 'off')
+
+        should_be_sent = self.notification_should_be_sent(
+            is_displayed=False  # WeeChat marks filtered messages as not displayed.
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_true_when_message_is_not_filtered_and_option_is_on(self):
+        set_config_option('notify_on_filtered_messages', 'on')
+
+        should_be_sent = self.notification_should_be_sent(
+            is_displayed=False  # WeeChat marks filtered messages as not displayed.
+        )
+
+        self.assertTrue(should_be_sent)
 
     def test_returns_false_when_away_and_option_is_off(self):
         BUFFER = 'buffer'
@@ -235,6 +257,30 @@ class NotificationShouldBeSentTests(TestsBase):
         should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
+
+    def test_returns_false_when_ordinary_message_in_buffer_not_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_true_when_ordinary_message_in_buffer_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#buffer')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertTrue(should_be_sent)
 
     def test_returns_false_for_notification_from_self(self):
         BUFFER = 'buffer'
@@ -309,7 +355,7 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertTrue(should_be_sent)
 
-    def test_returns_true_on_private_message_when_notify_on_privmsgs_is_off(self):
+    def test_returns_false_on_private_message_when_notify_on_privmsgs_is_off(self):
         set_config_option('notify_on_privmsgs', 'off')
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
@@ -391,6 +437,24 @@ class IsBelowMinNotificationDelayTests(TestsBase):
             'localvar_set_notify_send_last_notification_time',
             str(CURRENT_TIME)
         )
+
+
+class NamesForBufferTests(TestsBase):
+    """Tests for names_for_buffer()."""
+
+    def test_returns_correct_list_when_buffer_has_both_names(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+
+        self.assertEqual(names_for_buffer(BUFFER), ['network.#buffer', '#buffer'])
+
+    def test_returns_empty_list_when_buffer_has_no_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', '')
+        set_buffer_string(BUFFER, 'short_name', '')
+
+        self.assertEqual(names_for_buffer(BUFFER), [])
 
 
 class IgnoreNotificationsFromBufferTests(TestsBase):
@@ -543,6 +607,58 @@ class IgnoreNotificationsFromNickTests(TestsBase):
         set_config_option('ignore_nicks_starting_with', '  pre_  ')
 
         self.assertTrue(ignore_notifications_from_nick('pre_nick'))
+
+
+class NotifyOnAllMessagesInBufferTests(TestsBase):
+    """Tests for notify_on_all_messages_in_buffer()."""
+
+    def test_returns_false_when_list_does_not_contain_any_buffer(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_has_no_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', '')
+        set_buffer_string(BUFFER, 'short_name', '')
+        set_config_option('notify_on_all_messages_in_buffers', '')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_is_not_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#buffer1,#buffer2')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_short_name_is_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#aaa,#buffer,#bbb')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_full_name_is_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#aaa,network.#buffer,#bbb')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_strips_beginning_and_trailing_whitespace_from_buffers_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '  #buffer  ')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
 
 
 class EscapeHtmlTests(TestsBase):
@@ -751,6 +867,7 @@ class SendNotificationTests(TestsBase):
                 '--icon', 'icon.png',
                 '--expire-time', '5000',
                 '--urgency', 'normal',
+                '--',
                 'source',
                 'message'
             ],

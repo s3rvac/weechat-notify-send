@@ -4,8 +4,8 @@ weechat-notify-send
 [![Build Status](https://travis-ci.org/s3rvac/weechat-notify-send.svg?branch=master)](https://travis-ci.org/s3rvac/weechat-notify-send)
 [![Coverage Status](https://coveralls.io/repos/github/s3rvac/weechat-notify-send/badge.svg?branch=master)](https://coveralls.io/github/s3rvac/weechat-notify-send?branch=master)
 
-A [WeeChat](https://weechat.org/) plugin that sends highlight and
-private-message notifications through
+A [WeeChat](https://weechat.org/) plugin that sends highlight and message
+notifications through
 [notify-send](http://manpages.ubuntu.com/manpages/vivid/man1/notify-send.1.html).
 It requires [libnotify](https://developer.gnome.org/libnotify/), which provides
 the `notify-send` application.
@@ -38,9 +38,15 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 
 * `notify_on_highlights`. Send notifications on highlights. Default: `on`.
 * `notify_on_privmsgs`. Send notifications on private messages. Default: `on`.
+* `notify_on_filtered_messages`. Send notifications also on filtered (hidden)
+  messages. Default: `off`.
 * `notify_when_away`: Send also notifications when away. Default: `on`.
 * `notify_for_current_buffer`: Send also notifications for the currently active
   buffer. Default: `on`.
+* `notify_on_all_messages_in_buffers`: A comma-separated list of buffers for
+  which you want to receive notifications on all messages that appear in them.
+  You can use either short names (`#buffer`) or full names (`network.#buffer`).
+  Default: `''`.
 * `min_notification_delay`. A minimal delay in milliseconds between successive
   notifications from the same buffer. It is used to protect from floods/spam.
   Set it to `0` to disable this feature (i.e. all notifications will be shown).

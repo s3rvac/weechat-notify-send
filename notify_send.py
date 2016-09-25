@@ -2,8 +2,8 @@
 #
 # Project:     weechat-notify-send
 # Homepage:    https://github.com/s3rvac/weechat-notify-send
-# Description: Sends highlight and private-message notifications through
-#              notify-send. Requires libnotify.
+# Description: Sends highlight and message notifications through notify-send.
+#              Requires libnotify.
 # License:     MIT (see below)
 #
 # Copyright (c) 2015-2016 by Petr Zemek <s3rvac@gmail.com> and contributors
@@ -49,14 +49,13 @@ SCRIPT_NAME = 'notify_send'
 SCRIPT_AUTHOR = 's3rvac'
 
 # Version of the script.
-SCRIPT_VERSION = '0.5'
+SCRIPT_VERSION = '0.6 (dev)'
 
 # License under which the script is distributed.
 SCRIPT_LICENSE = 'MIT'
 
 # Description of the script.
-SCRIPT_DESC = ('Sends highlight and private-message notifications '
-               'through notify-send.')
+SCRIPT_DESC = 'Sends highlight and message notifications through notify-send.'
 
 # Name of a function to be called when the script is unloaded.
 SCRIPT_SHUTDOWN_FUNC = ''
@@ -74,6 +73,10 @@ OPTIONS = {
         'on',
         'Send notifications on private messages.'
     ),
+    'notify_on_filtered_messages': (
+        'off',
+        'Send notifications also on filtered (hidden) messages.'
+    ),
     'notify_when_away': (
         'on',
         'Send also notifications when away.'
@@ -81,6 +84,11 @@ OPTIONS = {
     'notify_for_current_buffer': (
         'on',
         'Send also notifications for the currently active buffer.'
+    ),
+    'notify_on_all_messages_in_buffers': (
+        '',
+        'A comma-separated list of buffers for which you want to receive '
+        'notifications on all messages that appear in them.'
     ),
     'min_notification_delay': (
         '500',
@@ -174,13 +182,14 @@ def nick_from_prefix(prefix):
     return re.sub(r'^[@+](.*)', r'\1', prefix)
 
 
-def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
-                    prefix, message):
-    """A callback for notifications from WeeChat."""
+def message_printed_callback(data, buffer, date, tags, is_displayed,
+                             is_highlight, prefix, message):
+    """A callback when a message is printed."""
+    is_displayed = int(is_displayed)
     is_highlight = int(is_highlight)
     nick = nick_from_prefix(prefix)
 
-    if notification_should_be_sent(buffer, nick, is_highlight):
+    if notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
         notification = prepare_notification(
             buffer, is_highlight, nick, message
         )
@@ -189,9 +198,10 @@ def notification_cb(data, buffer, date, tags, is_displayed, is_highlight,
     return weechat.WEECHAT_RC_OK
 
 
-def notification_should_be_sent(buffer, nick, is_highlight):
+def notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
     """Should a notification be sent?"""
-    if notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
+    if notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
+                                                     is_highlight):
         # The following function should be called only when the notification
         # should be sent (it updates the last notification time).
         if not is_below_min_notification_delay(buffer):
@@ -199,8 +209,13 @@ def notification_should_be_sent(buffer, nick, is_highlight):
     return False
 
 
-def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
+def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
+                                                  is_highlight):
     """Should a notification be sent when not considering time?"""
+    if not is_displayed:
+        if not notify_on_filtered_messages():
+            return False
+
     if buffer == weechat.current_buffer():
         if not notify_for_current_buffer():
             return False
@@ -219,12 +234,14 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_highlight):
         if i_am_author_of_message(buffer, nick):
             # Do not send notifications from myself.
             return False
-        return notify_on_privmsgs()
+        return notify_on_private_messages()
 
     if is_highlight:
         return notify_on_highlights()
 
-    # We send notifications only for private messages or highlights.
+    if notify_on_all_messages_in_buffer(buffer):
+        return True
+
     return False
 
 
@@ -279,6 +296,20 @@ def buffer_set_float(buffer, property, value):
     weechat.buffer_set(buffer, property, str(value))
 
 
+def names_for_buffer(buffer):
+    """Returns a list of all names for the given buffer."""
+    # The 'buffer' parameter passed to our callback is actually the buffer's ID
+    # (e.g. '0x2719cf0'). We have to check its name (e.g. 'freenode.#weechat')
+    # and short name (e.g. '#weechat') because these are what users specify in
+    # their configs.
+    buffer_names = [
+        weechat.buffer_get_string(buffer, 'name'),
+        weechat.buffer_get_string(buffer, 'short_name')
+    ]
+    # We want only non-empty names.
+    return [name for name in buffer_names if name]
+
+
 def notify_for_current_buffer():
     """Should we also send notifications for the current buffer?"""
     return weechat.config_get_plugin('notify_for_current_buffer') == 'on'
@@ -289,9 +320,14 @@ def notify_on_highlights():
     return weechat.config_get_plugin('notify_on_highlights') == 'on'
 
 
-def notify_on_privmsgs():
+def notify_on_private_messages():
     """Should we send notifications on private messages?"""
     return weechat.config_get_plugin('notify_on_privmsgs') == 'on'
+
+
+def notify_on_filtered_messages():
+    """Should we also send notifications for filtered (hidden) messages?"""
+    return weechat.config_get_plugin('notify_on_filtered_messages') == 'on'
 
 
 def notify_when_away():
@@ -314,15 +350,17 @@ def i_am_author_of_message(buffer, nick):
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
 
 
+def split_option_value(option, separator=','):
+    """Splits the value of the given plugin option by the given separator and
+    returns the result in a list.
+    """
+    values = weechat.config_get_plugin(option)
+    return [value.strip() for value in values.split(separator)]
+
+
 def ignore_notifications_from_buffer(buffer):
     """Should notifications from the given buffer be ignored?"""
-    # The 'buffer' parameter is actually the buffer's ID (e.g. '0x2719cf0'). We
-    # have to check its name (e.g. 'freenode.#weechat') and short name (e.g.
-    # '#weechat').
-    buffer_names = [
-        weechat.buffer_get_string(buffer, 'short_name'),
-        weechat.buffer_get_string(buffer, 'name')
-    ]
+    buffer_names = names_for_buffer(buffer)
 
     for buffer_name in buffer_names:
         if buffer_name and buffer_name in ignored_buffers():
@@ -338,17 +376,16 @@ def ignore_notifications_from_buffer(buffer):
 
 def ignored_buffers():
     """A generator of buffers from which notifications should be ignored."""
-    for buffer in weechat.config_get_plugin('ignore_buffers').split(','):
-        yield buffer.strip()
+    for buffer in split_option_value('ignore_buffers'):
+        yield buffer
 
 
 def ignored_buffer_prefixes():
     """A generator of buffer prefixes from which notifications should be
     ignored.
     """
-    prefixes = weechat.config_get_plugin('ignore_buffers_starting_with')
-    for prefix in prefixes.split(','):
-        yield prefix.strip()
+    for prefix in split_option_value('ignore_buffers_starting_with'):
+        yield prefix
 
 
 def ignore_notifications_from_nick(nick):
@@ -365,17 +402,34 @@ def ignore_notifications_from_nick(nick):
 
 def ignored_nicks():
     """A generator of nicks from which notifications should be ignored."""
-    for nick in weechat.config_get_plugin('ignore_nicks').split(','):
-        yield nick.strip()
+    for nick in split_option_value('ignore_nicks'):
+        yield nick
 
 
 def ignored_nick_prefixes():
     """A generator of nick prefixes from which notifications should be
     ignored.
     """
-    prefixes = weechat.config_get_plugin('ignore_nicks_starting_with')
-    for prefix in prefixes.split(','):
-        yield prefix.strip()
+    for prefix in split_option_value('ignore_nicks_starting_with'):
+        yield prefix
+
+
+def buffers_to_notify_on_all_messages():
+    """A generator of buffer names in which the user wants to be notified for
+    all messages.
+    """
+    for buffer in split_option_value('notify_on_all_messages_in_buffers'):
+        yield buffer
+
+
+def notify_on_all_messages_in_buffer(buffer):
+    """Does the user want to be notified for all messages in the given buffer?
+    """
+    buffer_names = names_for_buffer(buffer)
+    for buf in buffers_to_notify_on_all_messages():
+        if buf in buffer_names:
+            return True
+    return False
 
 
 def prepare_notification(buffer, is_highlight, nick, message):
@@ -453,7 +507,10 @@ def send_notification(notification):
         notify_cmd += ['--expire-time', str(notification.timeout)]
     if notification.urgency:
         notify_cmd += ['--urgency', notification.urgency]
-    notify_cmd += [notification.source, notification.message]
+    # We need to add '--' before the source and message to ensure that
+    # notify-send considers the remaining parameters as the source and the
+    # message. This prevents errors when a source or message starts with '--'.
+    notify_cmd += ['--', notification.source, notification.message]
 
     # Prevent notify-send from messing up the WeeChat screen when occasionally
     # emitting assertion messages by redirecting the output to /dev/null (you
@@ -486,4 +543,7 @@ if __name__ == '__main__':
         weechat.config_set_desc_plugin(option, description)
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, default_value)
-    weechat.hook_print('', 'irc_privmsg', '', 1, 'notification_cb', '')
+
+    # Catch all messages on all buffers and strip colors from them before
+    # passing them into the callback.
+    weechat.hook_print('', '', '', 1, 'message_printed_callback', '')
