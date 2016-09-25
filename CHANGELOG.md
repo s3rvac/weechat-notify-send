@@ -14,6 +14,9 @@ dev
 * Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
   can instruct the plugin to send notifications also for filtered (hidden)
   messages.
+* Improved the removal of modes from prefixes. Originally, only `@` (op on IRC)
+  and `+` (voice on IRC) were removed. Now, any character from the following
+  list is removed: `~&@%+-`. The meaning depends on the used protocol.
 * Fixed sending of notifications whose source or message starts with `--`.
 
 0.5 (2016-05-27)

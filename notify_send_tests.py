@@ -168,8 +168,12 @@ class NickFromPrefixTests(TestsBase):
         self.assertEqual(nick_from_prefix('nick'), 'nick')
 
     def test_returns_correct_value_when_prefix_is_nick_with_mode(self):
+        self.assertEqual(nick_from_prefix('~nick'), 'nick')
+        self.assertEqual(nick_from_prefix('&nick'), 'nick')
         self.assertEqual(nick_from_prefix('@nick'), 'nick')
+        self.assertEqual(nick_from_prefix('%nick'), 'nick')
         self.assertEqual(nick_from_prefix('+nick'), 'nick')
+        self.assertEqual(nick_from_prefix('-nick'), 'nick')
 
 
 class MessagePrintedCallbackTests(TestsBase):

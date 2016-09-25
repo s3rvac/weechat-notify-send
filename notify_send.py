@@ -178,7 +178,7 @@ def nick_from_prefix(prefix):
     IRC, @ denotes an operator and + denotes a user with voice).
     """
     # We have to remove the mode (if any).
-    return prefix.lstrip('@+')
+    return prefix.lstrip('~&@%+-')
 
 
 def message_printed_callback(data, buffer, date, tags, is_displayed,
