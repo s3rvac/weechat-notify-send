@@ -867,6 +867,7 @@ class SendNotificationTests(TestsBase):
                 '--icon', 'icon.png',
                 '--expire-time', '5000',
                 '--urgency', 'normal',
+                '--',
                 'source',
                 'message'
             ],

@@ -503,7 +503,10 @@ def send_notification(notification):
         notify_cmd += ['--expire-time', str(notification.timeout)]
     if notification.urgency:
         notify_cmd += ['--urgency', notification.urgency]
-    notify_cmd += [notification.source, notification.message]
+    # We need to add '--' before the source and message to ensure that
+    # notify-send considers the remaining parameters as the source and the
+    # message. This prevents errors when a source or message starts with '--'.
+    notify_cmd += ['--', notification.source, notification.message]
 
     # Prevent notify-send from messing up the WeeChat screen when occasionally
     # emitting assertion messages by redirecting the output to /dev/null (you

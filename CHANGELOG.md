@@ -14,6 +14,7 @@ dev
 * Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
   can instruct the plugin to send notifications also for filtered (hidden)
   messages.
+* Fixed sending of notifications whose source or message starts with `--`.
 
 0.5 (2016-05-27)
 ----------------
