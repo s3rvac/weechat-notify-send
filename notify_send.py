@@ -330,15 +330,21 @@ def i_am_author_of_message(buffer, nick):
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
 
 
+def names_for_buffer(buffer):
+    """Returns a list of all names for the given buffer."""
+    # The 'buffer' parameter passed to our callback is actually the buffer's ID
+    # (e.g. '0x2719cf0'). We have to check its name (e.g. 'freenode.#weechat')
+    # and short name (e.g. '#weechat') because these are what users specify in
+    # their configs.
+    return [
+        weechat.buffer_get_string(buffer, 'name'),
+        weechat.buffer_get_string(buffer, 'short_name')
+    ]
+
+
 def ignore_notifications_from_buffer(buffer):
     """Should notifications from the given buffer be ignored?"""
-    # The 'buffer' parameter is actually the buffer's ID (e.g. '0x2719cf0'). We
-    # have to check its name (e.g. 'freenode.#weechat') and short name (e.g.
-    # '#weechat').
-    buffer_names = [
-        weechat.buffer_get_string(buffer, 'short_name'),
-        weechat.buffer_get_string(buffer, 'name')
-    ]
+    buffer_names = names_for_buffer(buffer)
 
     for buffer_name in buffer_names:
         if buffer_name and buffer_name in ignored_buffers():
