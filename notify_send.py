@@ -28,7 +28,6 @@
 #
 
 import os
-import re
 import subprocess
 import sys
 import time
@@ -179,7 +178,7 @@ def nick_from_prefix(prefix):
     if the user is an operator or + if the user has voice).
     """
     # We have to remove the mode (if any).
-    return re.sub(r'^[@+](.*)', r'\1', prefix)
+    return prefix.lstrip('@+')
 
 
 def message_printed_callback(data, buffer, date, tags, is_displayed,
