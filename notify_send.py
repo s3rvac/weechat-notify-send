@@ -86,6 +86,11 @@ OPTIONS = {
         'on',
         'Send also notifications for the currently active buffer.'
     ),
+    'notify_on_all_messages_in_buffers': (
+        '',
+        'A comma-separated list of buffers for which you want to receive '
+        'notifications on all messages that appear in them.'
+    ),
     'min_notification_delay': (
         '500',
         'A minimal delay between successive notifications from the same '
@@ -235,7 +240,9 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
     if is_highlight:
         return notify_on_highlights()
 
-    # We send notifications only for private messages or highlights.
+    if notify_on_all_messages_in_buffer(buffer):
+        return True
+
     return False
 
 
@@ -400,6 +407,25 @@ def ignored_nick_prefixes():
     prefixes = weechat.config_get_plugin('ignore_nicks_starting_with')
     for prefix in prefixes.split(','):
         yield prefix.strip()
+
+
+def buffers_to_notify_on_all_messages():
+    """A generator of buffer names in which the user wants to be notified for
+    all messages.
+    """
+    buffers = weechat.config_get_plugin('notify_on_all_messages_in_buffers')
+    for buffer in buffers.split(','):
+        yield buffer.strip()
+
+
+def notify_on_all_messages_in_buffer(buffer):
+    """Does the user want to be notified for all messages in the given buffer?
+    """
+    buffer_names = names_for_buffer(buffer)
+    for buf in buffers_to_notify_on_all_messages():
+        if buf in buffer_names:
+            return True
+    return False
 
 
 def prepare_notification(buffer, is_highlight, nick, message):

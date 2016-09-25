@@ -53,6 +53,7 @@ from notify_send import names_for_buffer
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
 from notify_send import notification_should_be_sent
+from notify_send import notify_on_all_messages_in_buffer
 from notify_send import prepare_notification
 from notify_send import send_notification
 from notify_send import shorten_message
@@ -120,6 +121,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_on_filtered_messages', 'off')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
+        set_config_option('notify_on_all_messages_in_buffers', '')
         set_config_option('min_notification_delay', '0')
         set_config_option('ignore_buffers', '')
         set_config_option('ignore_buffers_starting_with', '')
@@ -255,6 +257,30 @@ class NotificationShouldBeSentTests(TestsBase):
         should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
+
+    def test_returns_false_when_ordinary_message_in_buffer_not_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_true_when_ordinary_message_in_buffer_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#buffer')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            is_highlight=False
+        )
+
+        self.assertTrue(should_be_sent)
 
     def test_returns_false_for_notification_from_self(self):
         BUFFER = 'buffer'
@@ -581,6 +607,58 @@ class IgnoreNotificationsFromNickTests(TestsBase):
         set_config_option('ignore_nicks_starting_with', '  pre_  ')
 
         self.assertTrue(ignore_notifications_from_nick('pre_nick'))
+
+
+class NotifyOnAllMessagesInBufferTests(TestsBase):
+    """Tests for notify_on_all_messages_in_buffer()."""
+
+    def test_returns_false_when_list_does_not_contain_any_buffer(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_has_no_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', '')
+        set_buffer_string(BUFFER, 'short_name', '')
+        set_config_option('notify_on_all_messages_in_buffers', '')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_false_when_buffer_is_not_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#buffer1,#buffer2')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_short_name_is_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#aaa,#buffer,#bbb')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_full_name_is_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '#aaa,network.#buffer,#bbb')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_strips_beginning_and_trailing_whitespace_from_buffers_in_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers', '  #buffer  ')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
 
 
 class EscapeHtmlTests(TestsBase):

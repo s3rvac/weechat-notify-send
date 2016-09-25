@@ -6,6 +6,10 @@ dev
 
 * All messages are now intercepted, not only those tagged with `irc_privmsg`.
   This should make the plugin working also for networks other than IRC.
+* Added a new option: `notify_on_all_messages_in_buffers`. A comma-separated
+  list of buffers for which you want to receive notifications on all messages
+  that appear in them. You can use either short names (`#buffer`) or full names
+  (`network.#buffer`). This list is empty by default.
 * Do not notify on filtered (hidden) messages by default.
 * Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
   can instruct the plugin to send notifications also for filtered (hidden)
