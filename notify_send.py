@@ -234,7 +234,7 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
         if i_am_author_of_message(buffer, nick):
             # Do not send notifications from myself.
             return False
-        return notify_on_privmsgs()
+        return notify_on_private_messages()
 
     if is_highlight:
         return notify_on_highlights()
@@ -306,7 +306,7 @@ def notify_on_highlights():
     return weechat.config_get_plugin('notify_on_highlights') == 'on'
 
 
-def notify_on_privmsgs():
+def notify_on_private_messages():
     """Should we send notifications on private messages?"""
     return weechat.config_get_plugin('notify_on_privmsgs') == 'on'
 
