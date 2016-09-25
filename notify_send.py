@@ -174,8 +174,8 @@ def add_default_value_to(description, default_value):
 def nick_from_prefix(prefix):
     """Returns a nick from the given prefix.
 
-    The prefix comes from WeeChat. It is a nick with an optional mode (e.g. @
-    if the user is an operator or + if the user has voice).
+    The prefix comes from WeeChat. It is a nick with an optional mode (e.g. on
+    IRC, @ denotes an operator and + denotes a user with voice).
     """
     # We have to remove the mode (if any).
     return prefix.lstrip('@+')

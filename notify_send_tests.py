@@ -167,10 +167,8 @@ class NickFromPrefixTests(TestsBase):
     def test_returns_correct_value_when_prefix_is_just_nick(self):
         self.assertEqual(nick_from_prefix('nick'), 'nick')
 
-    def test_returns_correct_value_when_prefix_is_nick_with_op(self):
+    def test_returns_correct_value_when_prefix_is_nick_with_mode(self):
         self.assertEqual(nick_from_prefix('@nick'), 'nick')
-
-    def test_returns_correct_value_when_prefix_is_nick_with_voice(self):
         self.assertEqual(nick_from_prefix('+nick'), 'nick')
 
 
