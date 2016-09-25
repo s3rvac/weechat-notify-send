@@ -376,14 +376,16 @@ def ignore_notifications_from_buffer(buffer):
 
 def ignored_buffers():
     """A generator of buffers from which notifications should be ignored."""
-    yield from split_option_value('ignore_buffers')
+    for buffer in split_option_value('ignore_buffers'):
+        yield buffer
 
 
 def ignored_buffer_prefixes():
     """A generator of buffer prefixes from which notifications should be
     ignored.
     """
-    yield from split_option_value('ignore_buffers_starting_with')
+    for prefix in split_option_value('ignore_buffers_starting_with'):
+        yield prefix
 
 
 def ignore_notifications_from_nick(nick):
@@ -400,21 +402,24 @@ def ignore_notifications_from_nick(nick):
 
 def ignored_nicks():
     """A generator of nicks from which notifications should be ignored."""
-    yield from split_option_value('ignore_nicks')
+    for nick in split_option_value('ignore_nicks'):
+        yield nick
 
 
 def ignored_nick_prefixes():
     """A generator of nick prefixes from which notifications should be
     ignored.
     """
-    yield from split_option_value('ignore_nicks_starting_with')
+    for prefix in split_option_value('ignore_nicks_starting_with'):
+        yield prefix
 
 
 def buffers_to_notify_on_all_messages():
     """A generator of buffer names in which the user wants to be notified for
     all messages.
     """
-    yield from split_option_value('notify_on_all_messages_in_buffers')
+    for buffer in split_option_value('notify_on_all_messages_in_buffers'):
+        yield buffer
 
 
 def notify_on_all_messages_in_buffer(buffer):
