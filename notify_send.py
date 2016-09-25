@@ -350,6 +350,14 @@ def i_am_author_of_message(buffer, nick):
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
 
 
+def split_option_value(option, separator=','):
+    """Splits the value of the given plugin option by the given separator and
+    returns the result in a list.
+    """
+    values = weechat.config_get_plugin(option)
+    return [value.strip() for value in values.split(separator)]
+
+
 def ignore_notifications_from_buffer(buffer):
     """Should notifications from the given buffer be ignored?"""
     buffer_names = names_for_buffer(buffer)
@@ -368,17 +376,14 @@ def ignore_notifications_from_buffer(buffer):
 
 def ignored_buffers():
     """A generator of buffers from which notifications should be ignored."""
-    for buffer in weechat.config_get_plugin('ignore_buffers').split(','):
-        yield buffer.strip()
+    yield from split_option_value('ignore_buffers')
 
 
 def ignored_buffer_prefixes():
     """A generator of buffer prefixes from which notifications should be
     ignored.
     """
-    prefixes = weechat.config_get_plugin('ignore_buffers_starting_with')
-    for prefix in prefixes.split(','):
-        yield prefix.strip()
+    yield from split_option_value('ignore_buffers_starting_with')
 
 
 def ignore_notifications_from_nick(nick):
@@ -395,26 +400,21 @@ def ignore_notifications_from_nick(nick):
 
 def ignored_nicks():
     """A generator of nicks from which notifications should be ignored."""
-    for nick in weechat.config_get_plugin('ignore_nicks').split(','):
-        yield nick.strip()
+    yield from split_option_value('ignore_nicks')
 
 
 def ignored_nick_prefixes():
     """A generator of nick prefixes from which notifications should be
     ignored.
     """
-    prefixes = weechat.config_get_plugin('ignore_nicks_starting_with')
-    for prefix in prefixes.split(','):
-        yield prefix.strip()
+    yield from split_option_value('ignore_nicks_starting_with')
 
 
 def buffers_to_notify_on_all_messages():
     """A generator of buffer names in which the user wants to be notified for
     all messages.
     """
-    buffers = weechat.config_get_plugin('notify_on_all_messages_in_buffers')
-    for buffer in buffers.split(','):
-        yield buffer.strip()
+    yield from split_option_value('notify_on_all_messages_in_buffers')
 
 
 def notify_on_all_messages_in_buffer(buffer):
