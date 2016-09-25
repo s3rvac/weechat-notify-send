@@ -49,6 +49,7 @@ from notify_send import ignore_notifications_from_buffer
 from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
 from notify_send import message_printed_callback
+from notify_send import names_for_buffer
 from notify_send import nick_from_prefix
 from notify_send import nick_separator
 from notify_send import notification_should_be_sent
@@ -410,6 +411,24 @@ class IsBelowMinNotificationDelayTests(TestsBase):
             'localvar_set_notify_send_last_notification_time',
             str(CURRENT_TIME)
         )
+
+
+class NamesForBufferTests(TestsBase):
+    """Tests for names_for_buffer()."""
+
+    def test_returns_correct_list_when_buffer_has_both_names(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+
+        self.assertEqual(names_for_buffer(BUFFER), ['network.#buffer', '#buffer'])
+
+    def test_returns_empty_list_when_buffer_has_no_name(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', '')
+        set_buffer_string(BUFFER, 'short_name', '')
+
+        self.assertEqual(names_for_buffer(BUFFER), [])
 
 
 class IgnoreNotificationsFromBufferTests(TestsBase):

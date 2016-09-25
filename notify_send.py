@@ -336,10 +336,12 @@ def names_for_buffer(buffer):
     # (e.g. '0x2719cf0'). We have to check its name (e.g. 'freenode.#weechat')
     # and short name (e.g. '#weechat') because these are what users specify in
     # their configs.
-    return [
+    buffer_names = [
         weechat.buffer_get_string(buffer, 'name'),
         weechat.buffer_get_string(buffer, 'short_name')
     ]
+    # We want only non-empty names.
+    return [name for name in buffer_names if name]
 
 
 def ignore_notifications_from_buffer(buffer):
