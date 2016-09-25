@@ -2,8 +2,8 @@
 #
 # Project:     weechat-notify-send
 # Homepage:    https://github.com/s3rvac/weechat-notify-send
-# Description: Sends highlight and private-message notifications through
-#              notify-send. Requires libnotify.
+# Description: Sends highlight and message notifications through notify-send.
+#              Requires libnotify.
 # License:     MIT (see below)
 #
 # Copyright (c) 2015-2016 by Petr Zemek <s3rvac@gmail.com> and contributors
@@ -55,8 +55,7 @@ SCRIPT_VERSION = '0.6 (dev)'
 SCRIPT_LICENSE = 'MIT'
 
 # Description of the script.
-SCRIPT_DESC = ('Sends highlight and private-message notifications '
-               'through notify-send.')
+SCRIPT_DESC = 'Sends highlight and message notifications through notify-send.'
 
 # Name of a function to be called when the script is unloaded.
 SCRIPT_SHUTDOWN_FUNC = ''

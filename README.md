@@ -4,8 +4,8 @@ weechat-notify-send
 [![Build Status](https://travis-ci.org/s3rvac/weechat-notify-send.svg?branch=master)](https://travis-ci.org/s3rvac/weechat-notify-send)
 [![Coverage Status](https://coveralls.io/repos/github/s3rvac/weechat-notify-send/badge.svg?branch=master)](https://coveralls.io/github/s3rvac/weechat-notify-send?branch=master)
 
-A [WeeChat](https://weechat.org/) plugin that sends highlight and
-private-message notifications through
+A [WeeChat](https://weechat.org/) plugin that sends highlight and message
+notifications through
 [notify-send](http://manpages.ubuntu.com/manpages/vivid/man1/notify-send.1.html).
 It requires [libnotify](https://developer.gnome.org/libnotify/), which provides
 the `notify-send` application.
