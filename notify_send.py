@@ -296,6 +296,20 @@ def buffer_set_float(buffer, property, value):
     weechat.buffer_set(buffer, property, str(value))
 
 
+def names_for_buffer(buffer):
+    """Returns a list of all names for the given buffer."""
+    # The 'buffer' parameter passed to our callback is actually the buffer's ID
+    # (e.g. '0x2719cf0'). We have to check its name (e.g. 'freenode.#weechat')
+    # and short name (e.g. '#weechat') because these are what users specify in
+    # their configs.
+    buffer_names = [
+        weechat.buffer_get_string(buffer, 'name'),
+        weechat.buffer_get_string(buffer, 'short_name')
+    ]
+    # We want only non-empty names.
+    return [name for name in buffer_names if name]
+
+
 def notify_for_current_buffer():
     """Should we also send notifications for the current buffer?"""
     return weechat.config_get_plugin('notify_for_current_buffer') == 'on'
@@ -334,20 +348,6 @@ def is_private_message(buffer):
 def i_am_author_of_message(buffer, nick):
     """Am I (the current WeeChat user) the author of the message?"""
     return weechat.buffer_get_string(buffer, 'localvar_nick') == nick
-
-
-def names_for_buffer(buffer):
-    """Returns a list of all names for the given buffer."""
-    # The 'buffer' parameter passed to our callback is actually the buffer's ID
-    # (e.g. '0x2719cf0'). We have to check its name (e.g. 'freenode.#weechat')
-    # and short name (e.g. '#weechat') because these are what users specify in
-    # their configs.
-    buffer_names = [
-        weechat.buffer_get_string(buffer, 'name'),
-        weechat.buffer_get_string(buffer, 'short_name')
-    ]
-    # We want only non-empty names.
-    return [name for name in buffer_names if name]
 
 
 def ignore_notifications_from_buffer(buffer):
