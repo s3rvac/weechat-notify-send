@@ -175,8 +175,14 @@ class NickThatSentMessageTests(TestsBase):
         self.assertEqual(nick_that_sent_message('', '+john'), 'john')
         self.assertEqual(nick_that_sent_message('', '-john'), 'john')
 
-    def test_removes_spaces_before_nick_when_obtained_from_prefix(self):
-        self.assertEqual(nick_that_sent_message('', '  john'), 'john')
+    def test_removes_also_space_before_nick_when_obtained_from_prefix(self):
+        self.assertEqual(nick_that_sent_message('', ' john'), 'john')
+
+    def test_only_single_character_is_removed_as_mode_from_prefix(self):
+        # Some protocols (e.g. Matrix) may start prefixes with a space.
+        # However, any subsequent characters should be considered to be part of
+        # the nick (e.g. from ' @john', we want '@john', including the '@').
+        self.assertEqual(nick_that_sent_message('', ' @john'), '@john')
 
     def test_returns_nick_from_tags_when_tags_only_contains_nick(self):
         self.assertEqual(nick_that_sent_message('nick_john', '--'), 'john')
