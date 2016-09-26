@@ -171,13 +171,22 @@ def add_default_value_to(description, default_value):
     )
 
 
-def nick_from_prefix(prefix):
-    """Returns a nick from the given prefix.
-
-    The prefix comes from WeeChat. It is a nick with an optional mode (e.g. on
-    IRC, @ denotes an operator and + denotes a user with voice).
+def nick_that_sent_message(tags, prefix):
+    """Returns a nick that sent the message based on the given data passed to
+    the callback.
     """
-    # We have to remove the mode (if any).
+    # 'tags' (str) is a comma-separated list of tags that WeeChat passed to the
+    # callback. It should contain a tag of the following form: nick_XYZ, where
+    # XYZ is the nick that sent the message.
+    for tag in tags.split(','):
+        if tag.startswith('nick_'):
+            return tag[5:]
+
+    # There is no nick in the tags, so check the prefix as a fallback.
+    # 'prefix' (str) is the prefix of the printed line with the message.
+    # Usually (but not always), it is a nick with an optional mode (e.g. on
+    # IRC, @ denotes an operator and + denotes a user with voice). We have to
+    # remove the mode (if any) before returning the nick.
     return prefix.lstrip('~&@%+-')
 
 
@@ -186,7 +195,7 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
     """A callback when a message is printed."""
     is_displayed = int(is_displayed)
     is_highlight = int(is_highlight)
-    nick = nick_from_prefix(prefix)
+    nick = nick_that_sent_message(tags, prefix)
 
     if notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
         notification = prepare_notification(

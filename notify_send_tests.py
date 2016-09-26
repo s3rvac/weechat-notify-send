@@ -50,8 +50,8 @@ from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
 from notify_send import message_printed_callback
 from notify_send import names_for_buffer
-from notify_send import nick_from_prefix
 from notify_send import nick_separator
+from notify_send import nick_that_sent_message
 from notify_send import notification_should_be_sent
 from notify_send import notify_on_all_messages_in_buffer
 from notify_send import prepare_notification
@@ -161,19 +161,29 @@ class AddDefaultValueToTests(TestsBase):
         self.assertEqual(description, 'Option description. Default: "".')
 
 
-class NickFromPrefixTests(TestsBase):
-    """Tests for nick_from_prefix()."""
+class NickThatSentMessageTests(TestsBase):
+    """Tests for nick_that_sent_message()."""
 
-    def test_returns_correct_value_when_prefix_is_just_nick(self):
-        self.assertEqual(nick_from_prefix('nick'), 'nick')
+    def test_returns_prefix_when_there_are_no_tags_and_prefix_has_no_modes(self):
+        self.assertEqual(nick_that_sent_message('', 'john'), 'john')
 
-    def test_returns_correct_value_when_prefix_is_nick_with_mode(self):
-        self.assertEqual(nick_from_prefix('~nick'), 'nick')
-        self.assertEqual(nick_from_prefix('&nick'), 'nick')
-        self.assertEqual(nick_from_prefix('@nick'), 'nick')
-        self.assertEqual(nick_from_prefix('%nick'), 'nick')
-        self.assertEqual(nick_from_prefix('+nick'), 'nick')
-        self.assertEqual(nick_from_prefix('-nick'), 'nick')
+    def test_returns_prefix_without_mode_when_there_are_no_tags_and_prefix_has_mode(self):
+        self.assertEqual(nick_that_sent_message('', '~john'), 'john')
+        self.assertEqual(nick_that_sent_message('', '&john'), 'john')
+        self.assertEqual(nick_that_sent_message('', '@john'), 'john')
+        self.assertEqual(nick_that_sent_message('', '%john'), 'john')
+        self.assertEqual(nick_that_sent_message('', '+john'), 'john')
+        self.assertEqual(nick_that_sent_message('', '-john'), 'john')
+
+    def test_returns_nick_from_tags_when_tags_only_contains_nick(self):
+        self.assertEqual(nick_that_sent_message('nick_john', '--'), 'john')
+
+    def test_returns_nick_from_tags_when_tags_contain_also_other_info(self):
+        tags = 'prefix_nick_lightcyan,nick_john,host_~user@domain.com'
+        self.assertEqual(nick_that_sent_message(tags, '--'), 'john')
+
+    def test_returns_empty_string_when_both_tags_and_prefix_are_empty(self):
+        self.assertEqual(nick_that_sent_message('', ''), '')
 
 
 class MessagePrintedCallbackTests(TestsBase):
@@ -193,7 +203,7 @@ class MessagePrintedCallbackTests(TestsBase):
         self.addCleanup(patcher.stop)
 
     def message_printed_callback(self, data=None, buffer='buffer', date=None,
-                                 tags=None, is_displayed='1', is_highlight='0',
+                                 tags='', is_displayed='1', is_highlight='0',
                                  prefix='prefix', message='message'):
         return message_printed_callback(data, buffer, date, tags, is_displayed,
                                         is_highlight, prefix, message)
