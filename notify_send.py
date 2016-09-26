@@ -187,7 +187,8 @@ def nick_that_sent_message(tags, prefix):
     # Usually (but not always), it is a nick with an optional mode (e.g. on
     # IRC, @ denotes an operator and + denotes a user with voice). We have to
     # remove the mode (if any) before returning the nick.
-    return prefix.lstrip('~&@%+-')
+    # Strip also spaces as some protocols may start nicks with a space.
+    return prefix.lstrip('~&@%+- ')
 
 
 def message_printed_callback(data, buffer, date, tags, is_displayed,

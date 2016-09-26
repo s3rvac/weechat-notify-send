@@ -175,6 +175,9 @@ class NickThatSentMessageTests(TestsBase):
         self.assertEqual(nick_that_sent_message('', '+john'), 'john')
         self.assertEqual(nick_that_sent_message('', '-john'), 'john')
 
+    def test_removes_spaces_before_nick_when_obtained_from_prefix(self):
+        self.assertEqual(nick_that_sent_message('', '  john'), 'john')
+
     def test_returns_nick_from_tags_when_tags_only_contains_nick(self):
         self.assertEqual(nick_that_sent_message('nick_john', '--'), 'john')
 
