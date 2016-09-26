@@ -6,22 +6,23 @@ dev
 
 * All messages are now intercepted, not only those tagged with `irc_privmsg`.
   This should make the plugin working also for networks other than IRC.
-* Added a new option: `notify_on_all_messages_in_buffers`. A comma-separated
-  list of buffers for which you want to receive notifications on all messages
-  that appear in them. You can use either short names (`#buffer`) or full names
-  (`network.#buffer`). This list is empty by default.
+* Added a new option: `notify_on_all_messages_in_buffers`. It is a
+  comma-separated list of buffers for which you want to receive notifications
+  on all messages that appear in them. You can use either short names
+  (`#buffer`) or full names (`network.#buffer`). This list is empty by default.
 * Do not notify on filtered (hidden) messages by default.
 * Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
   can instruct the plugin to send notifications also for filtered (hidden)
   messages.
-* Improved the detection of nicks from data passed by WeeChat. Originally, the
-  nick was obtained from the prefix. However, the prefix is not always the
-  nick. Now, the nick is first tried to be obtained from a tag of the form
-  `nick_XYZ`, where `XYZ` is the nick that sent the message. If this fails, the
-  nick is obtained from the prefix.
-* Improved the removal of modes from prefixes. Originally, only `@` (op on IRC)
-  and `+` (voice on IRC) were removed. Now, any character from the following
-  list is removed: `~&@%+-`. The meaning depends on the used protocol.
+* Improved the detection of nicks from the information passed by WeeChat.
+  Originally, the nick was obtained only from the prefix. However, the prefix
+  is not always the nick. Now, the nick is first tried to be obtained from a
+  tag of the form `nick_XYZ`, where `XYZ` is the nick that sent the message. If
+  this fails, the nick is obtained from the prefix (fallback).
+* Improved the removal of modes from messages prefixes. Originally, only `@`
+  (op on IRC) and `+` (voice on IRC) were removed. Now, any character from the
+  following list is removed from the beginning of the prefix: `~&@%+- `. The
+  meaning depends on the used protocol.
 * Improved the detection whether a notification should be shown based on the
   authorship of the message (do not show notifications for messages from self).
 * Fixed sending of notifications whose source or message starts with `--`.
