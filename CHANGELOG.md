@@ -22,6 +22,8 @@ dev
 * Improved the removal of modes from prefixes. Originally, only `@` (op on IRC)
   and `+` (voice on IRC) were removed. Now, any character from the following
   list is removed: `~&@%+-`. The meaning depends on the used protocol.
+* Improved the detection whether a notification should be shown based on the
+  authorship of the message (do not show notifications for messages from self).
 * Fixed sending of notifications whose source or message starts with `--`.
 
 0.5 (2016-05-27)

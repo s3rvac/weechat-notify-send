@@ -221,6 +221,9 @@ def notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
 def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
                                                   is_highlight):
     """Should a notification be sent when not considering time?"""
+    if i_am_author_of_message(buffer, nick):
+        return False
+
     if not is_displayed:
         if not notify_on_filtered_messages():
             return False
@@ -240,9 +243,6 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
         return False
 
     if is_private_message(buffer):
-        if i_am_author_of_message(buffer, nick):
-            # Do not send notifications from myself.
-            return False
         return notify_on_private_messages()
 
     if is_highlight:

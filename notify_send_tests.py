@@ -237,6 +237,18 @@ class NotificationShouldBeSentTests(TestsBase):
                                     is_displayed=True, is_highlight=True):
         return notification_should_be_sent(buffer, prefix, is_displayed, is_highlight)
 
+    def test_returns_false_for_message_from_self(self):
+        BUFFER = 'buffer'
+        PREFIX = 'prefix'
+        set_buffer_string(BUFFER, 'localvar_nick', PREFIX)
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            prefix=PREFIX
+        )
+
+        self.assertFalse(should_be_sent)
+
     def test_returns_false_when_message_is_filtered_and_option_is_off(self):
         set_config_option('notify_on_filtered_messages', 'off')
 
@@ -296,19 +308,6 @@ class NotificationShouldBeSentTests(TestsBase):
         )
 
         self.assertTrue(should_be_sent)
-
-    def test_returns_false_for_notification_from_self(self):
-        BUFFER = 'buffer'
-        set_buffer_string(BUFFER, 'localvar_type', 'private')
-        PREFIX = 'prefix'
-        set_buffer_string(BUFFER, 'localvar_nick', PREFIX)
-
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            prefix=PREFIX
-        )
-
-        self.assertFalse(should_be_sent)
 
     def test_returns_false_when_neither_private_message_or_highlight(self):
         BUFFER = 'buffer'
