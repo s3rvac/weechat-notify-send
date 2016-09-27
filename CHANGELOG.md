@@ -6,6 +6,9 @@ dev
 
 * All messages are now intercepted, not only those tagged with `irc_privmsg`.
   This should make the plugin working also for networks other than IRC.
+* Added a new option: `ignore_messages_tagged_with`: A comma-separated list of
+  message tags for which no notifications should be shown. Default:
+  `'irc_join,irc_quit'`.
 * Added a new option: `notify_on_all_messages_in_buffers`. It is a
   comma-separated list of buffers for which you want to receive notifications
   on all messages that appear in them. You can use either short names

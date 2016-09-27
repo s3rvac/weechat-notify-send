@@ -46,6 +46,7 @@ from notify_send import default_value_of
 from notify_send import escape_html
 from notify_send import escape_slashes
 from notify_send import ignore_notifications_from_buffer
+from notify_send import ignore_notifications_from_messages_tagged_with
 from notify_send import ignore_notifications_from_nick
 from notify_send import is_below_min_notification_delay
 from notify_send import message_printed_callback
@@ -123,6 +124,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('notify_on_all_messages_in_buffers', '')
         set_config_option('min_notification_delay', '0')
+        set_config_option('ignore_messages_tagged_with', '')
         set_config_option('ignore_buffers', '')
         set_config_option('ignore_buffers_starting_with', '')
         set_config_option('ignore_nicks', '')
@@ -239,9 +241,10 @@ class MessagePrintedCallbackTests(TestsBase):
 class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
-    def notification_should_be_sent(self, buffer='buffer', prefix='prefix',
+    def notification_should_be_sent(self, buffer='buffer', tags=(), prefix='prefix',
                                     is_displayed=True, is_highlight=True):
-        return notification_should_be_sent(buffer, prefix, is_displayed, is_highlight)
+        return notification_should_be_sent(buffer, tags, prefix,
+                                           is_displayed, is_highlight)
 
     def test_returns_false_for_message_from_self(self):
         BUFFER = 'buffer'
@@ -322,6 +325,18 @@ class NotificationShouldBeSentTests(TestsBase):
         should_be_sent = self.notification_should_be_sent(
             buffer=BUFFER,
             is_highlight=False
+        )
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_false_when_message_is_between_ignored_tags(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_type', 'private')
+        set_config_option('ignore_messages_tagged_with', 'tag1,tag2')
+
+        should_be_sent = self.notification_should_be_sent(
+            buffer=BUFFER,
+            tags=['tag2', 'tag3']
         )
 
         self.assertFalse(should_be_sent)
@@ -475,6 +490,31 @@ class NamesForBufferTests(TestsBase):
         set_buffer_string(BUFFER, 'short_name', '')
 
         self.assertEqual(names_for_buffer(BUFFER), [])
+
+
+class IgnoreNotificationsFromMessagesTaggedWith(TestsBase):
+    """Tests for ignore_notifications_from_messages_tagged_with()."""
+
+    def test_returns_false_when_no_tags_are_ignored(self):
+        set_config_option('ignore_messages_tagged_with', '')
+
+        self.assertFalse(
+            ignore_notifications_from_messages_tagged_with(['tag1', 'tag2'])
+        )
+
+    def test_returns_false_when_no_tag_is_between_ignored(self):
+        set_config_option('ignore_messages_tagged_with', 'tagA,tagB')
+
+        self.assertFalse(
+            ignore_notifications_from_messages_tagged_with(['tag1', 'tag2'])
+        )
+
+    def test_returns_true_when_tag_is_between_ignored(self):
+        set_config_option('ignore_messages_tagged_with', 'tag3,tag4,tag5')
+
+        self.assertTrue(
+            ignore_notifications_from_messages_tagged_with(['tag0', 'tag2', 'tag3'])
+        )
 
 
 class IgnoreNotificationsFromBufferTests(TestsBase):

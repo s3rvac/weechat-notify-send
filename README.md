@@ -51,6 +51,8 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   notifications from the same buffer. It is used to protect from floods/spam.
   Set it to `0` to disable this feature (i.e. all notifications will be shown).
   Default: `500` milliseconds.
+* `ignore_messages_tagged_with`: A comma-separated list of message tags for
+  which no notifications should be shown. Default: `'irc_join,irc_quit'`.
 * `ignore_buffers`: A comma-separated list of buffers from which no
   notifications should be shown. You can use either short names (`#buffer`) or
   full names (`network.#buffer`). Default: `''`.

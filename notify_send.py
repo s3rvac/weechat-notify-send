@@ -94,6 +94,11 @@ OPTIONS = {
         'A minimal delay between successive notifications from the same '
         'buffer (in milliseconds; set to 0 to show all notifications).'
     ),
+    'ignore_messages_tagged_with': (
+        'irc_join,irc_quit',
+        'A comma-separated list of message tags for which no notifications '
+        'should be shown.'
+    ),
     'ignore_buffers': (
         '',
         'A comma-separated list of buffers from which no notifications should '
@@ -209,7 +214,7 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
     tags = parse_tags(tags)
     nick = nick_that_sent_message(tags, prefix)
 
-    if notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
+    if notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
         notification = prepare_notification(
             buffer, is_highlight, nick, message
         )
@@ -218,10 +223,10 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
     return weechat.WEECHAT_RC_OK
 
 
-def notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
+def notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
     """Should a notification be sent?"""
-    if notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
-                                                     is_highlight):
+    if notification_should_be_sent_disregarding_time(buffer, tags, nick,
+                                                     is_displayed, is_highlight):
         # The following function should be called only when the notification
         # should be sent (it updates the last notification time).
         if not is_below_min_notification_delay(buffer):
@@ -229,8 +234,8 @@ def notification_should_be_sent(buffer, nick, is_displayed, is_highlight):
     return False
 
 
-def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
-                                                  is_highlight):
+def notification_should_be_sent_disregarding_time(buffer, tags, nick,
+                                                  is_displayed, is_highlight):
     """Should a notification be sent when not considering time?"""
     if i_am_author_of_message(buffer, nick):
         return False
@@ -246,6 +251,9 @@ def notification_should_be_sent_disregarding_time(buffer, nick, is_displayed,
     if is_away(buffer):
         if not notify_when_away():
             return False
+
+    if ignore_notifications_from_messages_tagged_with(tags):
+        return False
 
     if ignore_notifications_from_nick(nick):
         return False
@@ -376,6 +384,18 @@ def split_option_value(option, separator=','):
     """
     values = weechat.config_get_plugin(option)
     return [value.strip() for value in values.split(separator)]
+
+
+def ignore_notifications_from_messages_tagged_with(tags):
+    """Should notifications be ignored for a message tagged with the given
+    tags?
+    """
+    ignored_tags = split_option_value('ignore_messages_tagged_with')
+    for ignored_tag in ignored_tags:
+        for tag in tags:
+            if tag == ignored_tag:
+                return True
+    return False
 
 
 def ignore_notifications_from_buffer(buffer):
