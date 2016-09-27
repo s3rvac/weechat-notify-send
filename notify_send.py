@@ -175,10 +175,10 @@ def nick_that_sent_message(tags, prefix):
     """Returns a nick that sent the message based on the given data passed to
     the callback.
     """
-    # 'tags' (str) is a comma-separated list of tags that WeeChat passed to the
+    # 'tags' is a comma-separated list of tags that WeeChat passed to the
     # callback. It should contain a tag of the following form: nick_XYZ, where
     # XYZ is the nick that sent the message.
-    for tag in tags.split(','):
+    for tag in tags:
         if tag.startswith('nick_'):
             return tag[5:]
 
@@ -195,11 +195,18 @@ def nick_that_sent_message(tags, prefix):
     return prefix
 
 
+def parse_tags(tags):
+    """Parses the given "list" of tags (str) from WeeChat into a list.
+    """
+    return tags.split(',')
+
+
 def message_printed_callback(data, buffer, date, tags, is_displayed,
                              is_highlight, prefix, message):
     """A callback when a message is printed."""
     is_displayed = int(is_displayed)
     is_highlight = int(is_highlight)
+    tags = parse_tags(tags)
     nick = nick_that_sent_message(tags, prefix)
 
     if notification_should_be_sent(buffer, nick, is_displayed, is_highlight):

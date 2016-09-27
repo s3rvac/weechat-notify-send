@@ -165,34 +165,34 @@ class NickThatSentMessageTests(TestsBase):
     """Tests for nick_that_sent_message()."""
 
     def test_returns_prefix_when_there_are_no_tags_and_prefix_has_no_modes(self):
-        self.assertEqual(nick_that_sent_message('', 'john'), 'john')
+        self.assertEqual(nick_that_sent_message([], 'john'), 'john')
 
     def test_returns_prefix_without_mode_when_there_are_no_tags_and_prefix_has_mode(self):
-        self.assertEqual(nick_that_sent_message('', '~john'), 'john')
-        self.assertEqual(nick_that_sent_message('', '&john'), 'john')
-        self.assertEqual(nick_that_sent_message('', '@john'), 'john')
-        self.assertEqual(nick_that_sent_message('', '%john'), 'john')
-        self.assertEqual(nick_that_sent_message('', '+john'), 'john')
-        self.assertEqual(nick_that_sent_message('', '-john'), 'john')
+        self.assertEqual(nick_that_sent_message([], '~john'), 'john')
+        self.assertEqual(nick_that_sent_message([], '&john'), 'john')
+        self.assertEqual(nick_that_sent_message([], '@john'), 'john')
+        self.assertEqual(nick_that_sent_message([], '%john'), 'john')
+        self.assertEqual(nick_that_sent_message([], '+john'), 'john')
+        self.assertEqual(nick_that_sent_message([], '-john'), 'john')
 
     def test_removes_also_space_before_nick_when_obtained_from_prefix(self):
-        self.assertEqual(nick_that_sent_message('', ' john'), 'john')
+        self.assertEqual(nick_that_sent_message([], ' john'), 'john')
 
     def test_only_single_character_is_removed_as_mode_from_prefix(self):
         # Some protocols (e.g. Matrix) may start prefixes with a space.
         # However, any subsequent characters should be considered to be part of
         # the nick (e.g. from ' @john', we want '@john', including the '@').
-        self.assertEqual(nick_that_sent_message('', ' @john'), '@john')
+        self.assertEqual(nick_that_sent_message([], ' @john'), '@john')
 
     def test_returns_nick_from_tags_when_tags_only_contains_nick(self):
-        self.assertEqual(nick_that_sent_message('nick_john', '--'), 'john')
+        self.assertEqual(nick_that_sent_message(['nick_john'], '--'), 'john')
 
     def test_returns_nick_from_tags_when_tags_contain_also_other_info(self):
-        tags = 'prefix_nick_lightcyan,nick_john,host_~user@domain.com'
+        tags = ['prefix_nick_lightcyan', 'nick_john', 'host_~user@domain.com']
         self.assertEqual(nick_that_sent_message(tags, '--'), 'john')
 
     def test_returns_empty_string_when_both_tags_and_prefix_are_empty(self):
-        self.assertEqual(nick_that_sent_message('', ''), '')
+        self.assertEqual(nick_that_sent_message([], ''), '')
 
 
 class MessagePrintedCallbackTests(TestsBase):
