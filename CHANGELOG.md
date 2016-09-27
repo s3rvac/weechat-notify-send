@@ -4,6 +4,11 @@ Changelog
 dev
 ---
 
+* -
+
+0.6 (2016-09-27)
+----------------
+
 * All messages are now intercepted, not only those tagged with `irc_privmsg`.
   This should make the plugin working also for networks other than IRC (e.g.
   Matrix [#3](https://github.com/s3rvac/weechat-notify-send/issues/3)).
