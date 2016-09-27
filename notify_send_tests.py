@@ -241,19 +241,19 @@ class MessagePrintedCallbackTests(TestsBase):
 class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
-    def notification_should_be_sent(self, buffer='buffer', tags=(), prefix='prefix',
+    def notification_should_be_sent(self, buffer='buffer', tags=(), nick='nick',
                                     is_displayed=True, is_highlight=True):
-        return notification_should_be_sent(buffer, tags, prefix,
+        return notification_should_be_sent(buffer, tags, nick,
                                            is_displayed, is_highlight)
 
     def test_returns_false_for_message_from_self(self):
         BUFFER = 'buffer'
-        PREFIX = 'prefix'
-        set_buffer_string(BUFFER, 'localvar_nick', PREFIX)
+        NICK = 'nick'
+        set_buffer_string(BUFFER, 'localvar_nick', NICK)
 
         should_be_sent = self.notification_should_be_sent(
             buffer=BUFFER,
-            prefix=PREFIX
+            nick=NICK
         )
 
         self.assertFalse(should_be_sent)
@@ -359,7 +359,7 @@ class NotificationShouldBeSentTests(TestsBase):
         set_config_option('ignore_nicks', 'nick')
 
         should_be_sent = self.notification_should_be_sent(
-            prefix='nick'
+            nick='nick'
         )
 
         self.assertFalse(should_be_sent)
