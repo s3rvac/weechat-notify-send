@@ -5,7 +5,8 @@ dev
 ---
 
 * All messages are now intercepted, not only those tagged with `irc_privmsg`.
-  This should make the plugin working also for networks other than IRC.
+  This should make the plugin working also for networks other than IRC (e.g.
+  Matrix [#3](https://github.com/s3rvac/weechat-notify-send/issues/3)).
 * Added a new option: `ignore_messages_tagged_with`: A comma-separated list of
   message tags for which no notifications should be shown. Default:
   `'irc_join,irc_quit'`.
