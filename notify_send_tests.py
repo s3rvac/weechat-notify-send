@@ -482,7 +482,22 @@ class NamesForBufferTests(TestsBase):
         set_buffer_string(BUFFER, 'name', 'network.#buffer')
         set_buffer_string(BUFFER, 'short_name', '#buffer')
 
-        self.assertEqual(names_for_buffer(BUFFER), ['network.#buffer', '#buffer'])
+        self.assertEqual(
+            names_for_buffer(BUFFER),
+            ['network.#buffer', '#buffer']
+        )
+
+    def test_includes_short_name_with_hash_when_short_name_starts_with_gt(self):
+        # This may happen with the wee_slack plugin, see the comment in
+        # names_for_buffer().
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '>buffer')
+
+        self.assertEqual(
+            names_for_buffer(BUFFER),
+            ['network.#buffer', '>buffer', '#buffer']
+        )
 
     def test_returns_empty_list_when_buffer_has_no_name(self):
         BUFFER = 'buffer'

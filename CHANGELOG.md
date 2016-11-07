@@ -4,6 +4,13 @@ Changelog
 dev
 ---
 
+* When checking for a buffer-name match, consider `>channel` and `#channel` to
+  be equal. The reason is that the
+  [wee_slack](https://github.com/rawdigits/wee-slack) plugin replaces `#` with
+  `>` to indicate that someone in the buffer is typing. This fixes the behavior
+  of several configuration options (e.g. `notify_on_all_messages_in_buffers`)
+  when [weechat_notify_send](https://github.com/s3rvac/weechat-notify-send) is
+  used together with [wee_slack](https://github.com/rawdigits/wee-slack).
 * Do not show notifications for some more messages that were ignored in
   previous versions of the plugin. More specifically, do not show notifications
   for messages tagged with `irc_part`, `irc_status`, `irc_nick_back`,

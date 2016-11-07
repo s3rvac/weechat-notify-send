@@ -337,12 +337,28 @@ def names_for_buffer(buffer):
     # (e.g. '0x2719cf0'). We have to check its name (e.g. 'freenode.#weechat')
     # and short name (e.g. '#weechat') because these are what users specify in
     # their configs.
-    buffer_names = [
-        weechat.buffer_get_string(buffer, 'name'),
-        weechat.buffer_get_string(buffer, 'short_name')
-    ]
-    # We want only non-empty names.
-    return [name for name in buffer_names if name]
+    buffer_names = []
+
+    full_name = weechat.buffer_get_string(buffer, 'name')
+    if full_name:
+        buffer_names.append(full_name)
+
+    short_name = weechat.buffer_get_string(buffer, 'short_name')
+    if short_name:
+        buffer_names.append(short_name)
+        # Consider >channel and #channel to be equal buffer names. The reason
+        # is that the https://github.com/rawdigits/wee-slack plugin replaces
+        # '#' with '>' to indicate that someone in the buffer is typing. This
+        # fixes the behavior of several configuration options (e.g.
+        # 'notify_on_all_messages_in_buffers') when weechat_notify_send is used
+        # together with the wee_slack plugin.
+        #
+        # Note that this is only needed to be done for the short name. Indeed,
+        # the full name always stays unchanged.
+        if short_name.startswith('>'):
+            buffer_names.append('#' + short_name[1:])
+
+    return buffer_names
 
 
 def notify_for_current_buffer():
