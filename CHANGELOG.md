@@ -4,7 +4,10 @@ Changelog
 dev
 ---
 
-* -
+* Do not show notifications for some more messages that were ignored in
+  previous versions of the plugin. More specifically, do not show notifications
+  for messages tagged with `irc_part`, `irc_status`, `irc_nick_back`,
+  `irc_401`, and `irc_402`.
 
 0.6 (2016-09-27)
 ----------------
