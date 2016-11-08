@@ -6,7 +6,7 @@ exclude_lines =
     # WeeChat import error.
     except ImportError:
 
-	# Code only for Python 2.
+    # Code only for Python 2.
     if sys.version_info.major == 2:
 
     # Code that is run only when a script is executed directly.
