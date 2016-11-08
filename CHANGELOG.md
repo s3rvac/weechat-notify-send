@@ -15,6 +15,9 @@ dev
   previous versions of the plugin. More specifically, do not show notifications
   for messages tagged with `irc_part`, `irc_status`, `irc_nick_back`,
   `irc_401`, and `irc_402`.
+* Fixed shortening of messages containing non-ASCII characters. Previously, it
+  might have happen that a message was split inside of a multibyte character.
+  This created an invalid message and caused `notify-send` to fail.
 
 0.6 (2016-09-27)
 ----------------

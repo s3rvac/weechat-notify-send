@@ -532,6 +532,33 @@ def shorten_message(message, max_length, ellipsis):
     """Shortens the message to at most max_length characters by using the given
     ellipsis.
     """
+    # In Python 2, we need to decode the message and ellipsis into Unicode to
+    # correctly (1) detect their length and (2) shorten the message. Failing to
+    # do that could make the shortened message invalid and cause notify-send to
+    # fail. For example, when we have bytes, we cannot guarantee that we do not
+    # split the message inside of a multibyte character.
+    if sys.version_info.major == 2:
+        try:
+            message = message.decode('utf-8')
+            ellipsis = ellipsis.decode('utf-8')
+        except UnicodeDecodeError:
+            # Either (or both) of the two cannot be decoded. Continue in a
+            # best-effort manner.
+            pass
+
+    message = shorten_unicode_message(message, max_length, ellipsis)
+
+    if sys.version_info.major == 2:
+        if not isinstance(message, str):
+            message = message.encode('utf-8')
+
+    return message
+
+
+def shorten_unicode_message(message, max_length, ellipsis):
+    """An internal specialized version of shorten_message() when the both the
+    message and ellipsis are str (in Python 3) or unicode (in Python 2).
+    """
     if max_length <= 0 or len(message) <= max_length:
         # Nothing to shorten.
         return message

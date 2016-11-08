@@ -908,6 +908,12 @@ class ShortenMessageTests(TestsBase):
             '[..'
         )
 
+    def test_does_not_split_message_inside_multibyte_character(self):
+        self.assertEqual(
+            shorten_message('čččč', max_length=3, ellipsis='.'),
+            'čč.'
+        )
+
 
 class SendNotificationTests(TestsBase):
     """Tests for send_notification()."""
