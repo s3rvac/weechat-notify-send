@@ -61,8 +61,8 @@ from notify_send import shorten_message
 
 
 def new_notification(source='source', message='message', icon='icon.png',
-                     timeout=5000, urgency='normal'):
-    return Notification(source, message, icon, timeout, urgency)
+                     timeout=5000, transient=True, urgency='normal'):
+    return Notification(source, message, icon, timeout, transient, urgency)
 
 
 def set_config_option(option, value):
@@ -135,6 +135,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('ellipsis', '')
         set_config_option('icon', '')
         set_config_option('timeout', '0')
+        set_config_option('transient', 'on')
         set_config_option('urgency', '')
 
         # Mimic the behavior of weechat.buffer_get_string() by returning the
@@ -806,6 +807,20 @@ class PrepareNotificationTests(TestsBase):
 
         self.assertEqual(notification.timeout, TIMEOUT)
 
+    def test_notification_has_correct_transient_when_on(self):
+        set_config_option('transient', 'on')
+
+        notification = self.prepare_notification()
+
+        self.assertTrue(notification.transient)
+
+    def test_notification_has_correct_transient_when_off(self):
+        set_config_option('transient', 'off')
+
+        notification = self.prepare_notification()
+
+        self.assertFalse(notification.transient)
+
     def test_notification_has_correct_urgency(self):
         URGENCY = 'critical'
         set_config_option('urgency', URGENCY)
@@ -932,6 +947,7 @@ class SendNotificationTests(TestsBase):
             message='message',
             icon='icon.png',
             timeout=5000,
+            transient=True,
             urgency='normal'
         )
 
@@ -947,6 +963,7 @@ class SendNotificationTests(TestsBase):
                 '--app-name', 'weechat',
                 '--icon', 'icon.png',
                 '--expire-time', '5000',
+                '--hint', 'int:transient:1',
                 '--urgency', 'normal',
                 '--',
                 'source',
@@ -971,6 +988,14 @@ class SendNotificationTests(TestsBase):
 
         notify_cmd = self.subprocess.check_call.call_args[0][0]
         self.assertNotIn('--expire-time', notify_cmd)
+
+    def test_does_not_include_transient_hint_in_command_when_transient_is_off(self):
+        notification = new_notification(transient=False)
+
+        send_notification(notification)
+
+        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        self.assertNotIn('int:transient:1', notify_cmd)
 
     def test_does_not_include_urgency_in_command_when_urgency_is_not_set(self):
         notification = new_notification(urgency='')

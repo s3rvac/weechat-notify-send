@@ -75,6 +75,8 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   `/usr/share/icons/hicolor/32x32/apps/weechat.png`.
 * `timeout`: Time after which the notification disappears (in milliseconds).
   Set it to 0 to disable the timeout. Default: 5000 (5 seconds).
+* `transient`: When a notification expires or is dismissed, remove it from the
+  notification bar. Set it to `off` to keep the notification. Default: `on`.
 * `urgency`: Notification urgency (`low`, `normal`, `critical`). Default:
   `normal`.
 

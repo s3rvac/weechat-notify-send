@@ -4,6 +4,10 @@ Changelog
 dev
 ---
 
+* Notifications are now transient by default. That is, when a notification
+  expires or is dismissed, it is removed from the notification bar. To disable
+  this behavior, set the `plugins.var.python.notify_send.transient`
+  configuration option to `off`.
 * When checking for a buffer-name match, consider `>channel` and `#channel` to
   be equal. The reason is that the
   [wee_slack](https://github.com/rawdigits/wee-slack) plugin replaces `#` with

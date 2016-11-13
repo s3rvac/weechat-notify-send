@@ -151,6 +151,11 @@ OPTIONS = {
         'Time after which the notification disappears (in milliseconds; '
         'set to 0 to disable).'
     ),
+    'transient': (
+        'on',
+        'When a notification expires or is dismissed, remove it from the '
+        'notification bar.'
+    ),
     'urgency': (
         'normal',
         'Urgency (low, normal, critical).'
@@ -161,11 +166,12 @@ OPTIONS = {
 class Notification(object):
     """A representation of a notification."""
 
-    def __init__(self, source, message, icon, timeout, urgency):
+    def __init__(self, source, message, icon, timeout, transient, urgency):
         self.source = source
         self.message = message
         self.icon = icon
         self.timeout = timeout
+        self.transient = transient
         self.urgency = urgency
 
 
@@ -517,9 +523,17 @@ def prepare_notification(buffer, is_highlight, nick, message):
 
     icon = weechat.config_get_plugin('icon')
     timeout = weechat.config_get_plugin('timeout')
+    transient = should_notifications_be_transient()
     urgency = weechat.config_get_plugin('urgency')
 
-    return Notification(source, message, icon, timeout, urgency)
+    return Notification(source, message, icon, timeout, transient, urgency)
+
+
+def should_notifications_be_transient():
+    """Should the sent notifications be transient, i.e. should they be removed
+    from the notification bar once they expire or are dismissed?
+    """
+    return weechat.config_get_plugin('transient') == 'on'
 
 
 def nick_separator():
@@ -595,6 +609,8 @@ def send_notification(notification):
         notify_cmd += ['--icon', notification.icon]
     if notification.timeout:
         notify_cmd += ['--expire-time', str(notification.timeout)]
+    if notification.transient:
+        notify_cmd += ['--hint', 'int:transient:1']
     if notification.urgency:
         notify_cmd += ['--urgency', notification.urgency]
     # We need to add '--' before the source and message to ensure that
