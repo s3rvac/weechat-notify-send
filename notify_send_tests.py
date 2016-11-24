@@ -781,6 +781,7 @@ class PrepareNotificationTests(TestsBase):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('nick_separator', ': ')
+
         notification = self.prepare_notification(
             buffer=BUFFER,
             is_highlight=True,
