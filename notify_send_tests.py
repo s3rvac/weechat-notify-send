@@ -976,6 +976,14 @@ class SendNotificationTests(TestsBase):
             stdout=AnyDevNullStream()
         )
 
+    def test_source_is_set_to_hyphen_when_source_is_empty(self):
+        notification = new_notification(source='')
+
+        send_notification(notification)
+
+        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        self.assertIn('-', notify_cmd)
+
     def test_does_not_include_icon_in_command_when_icon_is_not_set(self):
         notification = new_notification(icon='')
 

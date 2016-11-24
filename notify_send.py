@@ -613,7 +613,13 @@ def send_notification(notification):
     # We need to add '--' before the source and message to ensure that
     # notify-send considers the remaining parameters as the source and the
     # message. This prevents errors when a source or message starts with '--'.
-    notify_cmd += ['--', notification.source, notification.message]
+    notify_cmd += [
+        '--',
+        # notify-send fails with "No summary specified." when no source is
+        # specified, so ensure that there is always a non-empty source.
+        notification.source or '-',
+        notification.message
+    ]
 
     # Prevent notify-send from messing up the WeeChat screen when occasionally
     # emitting assertion messages by redirecting the output to /dev/null (you
