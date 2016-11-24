@@ -19,6 +19,10 @@ dev
   previous versions of the plugin. More specifically, do not show notifications
   for messages tagged with `irc_part`, `irc_status`, `irc_nick_back`,
   `irc_401`, and `irc_402`.
+* Made notifications for ordinary messages look like highlight notifications
+  when the buffer is in `notify_on_all_messages_in_buffers`. Previously, such
+  notifications looked like private-message notifications, which was
+  misleading.
 * Fixed shortening of messages containing non-ASCII characters. Previously, it
   might have happen that a message was split inside of a multibyte character.
   This created an invalid message and caused `notify-send` to fail.

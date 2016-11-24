@@ -228,9 +228,7 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
     nick = nick_that_sent_message(tags, prefix)
 
     if notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
-        notification = prepare_notification(
-            buffer, is_highlight, nick, message
-        )
+        notification = prepare_notification(buffer, nick, message)
         send_notification(notification)
 
     return weechat.WEECHAT_RC_OK
@@ -501,15 +499,14 @@ def notify_on_all_messages_in_buffer(buffer):
     return False
 
 
-def prepare_notification(buffer, is_highlight, nick, message):
+def prepare_notification(buffer, nick, message):
     """Prepares a notification from the given data."""
-    if is_highlight:
+    if is_private_message(buffer):
+        source = nick
+    else:
         source = (weechat.buffer_get_string(buffer, 'short_name') or
                   weechat.buffer_get_string(buffer, 'name'))
         message = nick + nick_separator() + message
-    else:
-        # A private message.
-        source = nick
 
     max_length = int(weechat.config_get_plugin('max_length'))
     if max_length > 0:

@@ -760,33 +760,35 @@ class EscapeSlashesTests(TestsBase):
 class PrepareNotificationTests(TestsBase):
     """Tests for prepare_notification()."""
 
-    def prepare_notification(self, buffer='buffer', is_highlight=False,
-                             nick='nick', message='message'):
-        return prepare_notification(buffer, is_highlight, nick, message)
+    def prepare_notification(self, buffer='buffer', nick='nick', message='message',
+                             is_private_message=True):
+        if is_private_message:
+            set_buffer_string(buffer, 'localvar_type', 'private')
+        return prepare_notification(buffer, nick, message)
 
-    def test_notification_has_correct_source_and_message_when_not_highlight(self):
+    def test_notification_has_correct_source_and_message_when_private_message(self):
         NICK = 'nick'
         MESSAGE = 'message'
 
         notification = self.prepare_notification(
-            is_highlight=False,
             nick=NICK,
-            message=MESSAGE
+            message=MESSAGE,
+            is_private_message=True
         )
 
         self.assertEqual(notification.source, NICK)
         self.assertEqual(notification.message, MESSAGE)
 
-    def test_notification_has_correct_source_and_message_when_is_highlight(self):
+    def test_notification_has_correct_source_and_message_when_ordinary_message(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('nick_separator', ': ')
 
         notification = self.prepare_notification(
             buffer=BUFFER,
-            is_highlight=True,
             nick='nick',
-            message='message'
+            message='message',
+            is_private_message=False
         )
 
         self.assertEqual(notification.source, '#buffer')
