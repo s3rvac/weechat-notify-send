@@ -330,6 +330,16 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
+    def test_returns_false_when_nick_is_missing(self):
+        set_config_option('notify_on_highlights', 'on')
+
+        should_be_sent = self.notification_should_be_sent(
+            nick='',
+            is_highlight=True
+        )
+
+        self.assertFalse(should_be_sent)
+
     def test_returns_false_when_message_is_between_ignored_tags(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')

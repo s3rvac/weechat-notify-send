@@ -23,6 +23,8 @@ dev
   when the buffer is in `notify_on_all_messages_in_buffers`. Previously, such
   notifications looked like private-message notifications, which was
   misleading.
+* Do not show notifications for messages without a nick. A nick is required to
+  form a correct notification source/message.
 * Fixed displaying of notifications without a source. Previously, `notify-send`
   failed with the following error message: `No summary specified.`
 * Fixed shortening of messages containing non-ASCII characters. Previously, it

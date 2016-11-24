@@ -248,6 +248,10 @@ def notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
 def notification_should_be_sent_disregarding_time(buffer, tags, nick,
                                                   is_displayed, is_highlight):
     """Should a notification be sent when not considering time?"""
+    if not nick:
+        # A nick is required to form a correct notification source/message.
+        return False
+
     if i_am_author_of_message(buffer, nick):
         return False
 
