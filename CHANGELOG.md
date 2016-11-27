@@ -4,10 +4,10 @@ Changelog
 dev
 ---
 
-* Notifications are now transient by default. That is, when a notification
-  expires or is dismissed, it is removed from the notification bar. To disable
-  this behavior, set the `plugins.var.python.notify_send.transient`
-  configuration option to `off`.
+* Notifications are transient by default. That is, when a notification expires
+  or is dismissed, it is removed from the notification bar. To disable this
+  behavior, set the `plugins.var.python.notify_send.transient` configuration
+  option to `off`.
 * When checking for a buffer-name match, consider `>channel` and `#channel` to
   be equal. The reason is that the
   [wee_slack](https://github.com/rawdigits/wee-slack) plugin replaces `#` with
@@ -15,16 +15,16 @@ dev
   of several configuration options (e.g. `notify_on_all_messages_in_buffers`)
   when [weechat_notify_send](https://github.com/s3rvac/weechat-notify-send) is
   used together with [wee_slack](https://github.com/rawdigits/wee-slack).
-* Do not show notifications for some more messages that were ignored in
-  previous versions of the plugin. More specifically, do not show notifications
-  for messages tagged with `irc_part`, `irc_status`, `irc_nick_back`,
-  `irc_401`, and `irc_402`.
+* Do not show notifications for some messages that were ignored in previous
+  versions of the plugin. More specifically, do not show notifications for
+  messages tagged with `irc_part`, `irc_status`, `irc_nick_back`, `irc_401`,
+  and `irc_402`.
 * Made notifications for ordinary messages look like highlight notifications
   when the buffer is in `notify_on_all_messages_in_buffers`. Previously, such
   notifications looked like private-message notifications, which was
   misleading.
 * Do not show notifications for messages without a nick. A nick is required to
-  form a correct notification source/message.
+  form a correct notification source and message.
 * Fixed displaying of notifications without a source. Previously, `notify-send`
   failed with the following error message: `No summary specified.`
 * Fixed shortening of messages containing non-ASCII characters. Previously, it
