@@ -4,6 +4,11 @@ Changelog
 dev
 ---
 
+* -
+
+0.7 (2016-11-27)
+----------------
+
 * Notifications are transient by default. That is, when a notification expires
   or is dismissed, it is removed from the notification bar. To disable this
   behavior, set the `plugins.var.python.notify_send.transient` configuration
