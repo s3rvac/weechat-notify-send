@@ -48,7 +48,7 @@ SCRIPT_NAME = 'notify_send'
 SCRIPT_AUTHOR = 's3rvac'
 
 # Version of the script.
-SCRIPT_VERSION = '0.7'
+SCRIPT_VERSION = '0.8 (dev)'
 
 # License under which the script is distributed.
 SCRIPT_LICENSE = 'MIT'
