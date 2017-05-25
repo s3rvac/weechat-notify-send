@@ -83,7 +83,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 License
 -------
 
-Copyright (c) 2015-2016 Petr Zemek (s3rvac@gmail.com) and contributors.
+Copyright (c) 2015-2017 Petr Zemek (s3rvac@gmail.com) and contributors.
 
 Distributed under the MIT license. See the
 [`LICENSE`](https://github.com/s3rvac/weechat-notify-send/blob/master/LICENSE)
