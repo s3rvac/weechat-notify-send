@@ -214,8 +214,7 @@ def nick_that_sent_message(tags, prefix):
 
 
 def parse_tags(tags):
-    """Parses the given "list" of tags (str) from WeeChat into a list.
-    """
+    """Parses the given "list" of tags (str) from WeeChat into a list."""
     return tags.split(',')
 
 
