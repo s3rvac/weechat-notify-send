@@ -4,7 +4,11 @@ Changelog
 dev
 ---
 
-* -
+* Replaced the word *plugin* with *script* in README and source files as
+  technically, `weechat-notify-send` is a
+  [script](https://weechat.org/files/doc/stable/weechat_scripting.en.html#differences_with_c_api),
+  not a plugin (see
+  [#8](https://github.com/s3rvac/weechat-notify-send/issues/8)).
 
 0.7 (2016-11-27)
 ----------------
@@ -15,13 +19,13 @@ dev
   option to `off`.
 * When checking for a buffer-name match, consider `>channel` and `#channel` to
   be equal. The reason is that the
-  [wee_slack](https://github.com/rawdigits/wee-slack) plugin replaces `#` with
+  [wee_slack](https://github.com/rawdigits/wee-slack) script replaces `#` with
   `>` to indicate that someone in the buffer is typing. This fixes the behavior
   of several configuration options (e.g. `notify_on_all_messages_in_buffers`)
   when [weechat_notify_send](https://github.com/s3rvac/weechat-notify-send) is
   used together with [wee_slack](https://github.com/rawdigits/wee-slack).
 * Do not show notifications for some messages that were ignored in previous
-  versions of the plugin. More specifically, do not show notifications for
+  versions of the script. More specifically, do not show notifications for
   messages tagged with `irc_part`, `irc_status`, `irc_nick_back`, `irc_401`,
   and `irc_402`.
 * Made notifications for ordinary messages look like highlight notifications
@@ -40,7 +44,7 @@ dev
 ----------------
 
 * All messages are now intercepted, not only those tagged with `irc_privmsg`.
-  This should make the plugin working also for networks other than IRC (e.g.
+  This should make the script working also for networks other than IRC (e.g.
   Matrix [#3](https://github.com/s3rvac/weechat-notify-send/issues/3)).
 * Added a new option: `ignore_messages_tagged_with`: A comma-separated list of
   message tags for which no notifications should be shown. Default:
@@ -51,7 +55,7 @@ dev
   (`#buffer`) or full names (`network.#buffer`). This list is empty by default.
 * Do not notify on filtered (hidden) messages by default.
 * Added a new option: `notify_on_filtered_messages`. By turning it `on`, you
-  can instruct the plugin to send notifications also for filtered (hidden)
+  can instruct the script to send notifications also for filtered (hidden)
   messages.
 * Improved the detection of nicks from the information passed by WeeChat.
   Originally, the nick was obtained only from the prefix. However, the prefix

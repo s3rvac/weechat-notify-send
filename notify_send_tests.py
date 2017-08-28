@@ -499,7 +499,7 @@ class NamesForBufferTests(TestsBase):
         )
 
     def test_includes_short_name_with_hash_when_short_name_starts_with_gt(self):
-        # This may happen with the wee_slack plugin, see the comment in
+        # This may happen with the wee_slack script, see the comment in
         # names_for_buffer().
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'name', 'network.#buffer')

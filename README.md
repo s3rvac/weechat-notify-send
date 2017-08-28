@@ -4,7 +4,7 @@ weechat-notify-send
 [![Build Status](https://travis-ci.org/s3rvac/weechat-notify-send.svg?branch=master)](https://travis-ci.org/s3rvac/weechat-notify-send)
 [![Coverage Status](https://coveralls.io/repos/github/s3rvac/weechat-notify-send/badge.svg?branch=master)](https://coveralls.io/github/s3rvac/weechat-notify-send?branch=master)
 
-A [WeeChat](https://weechat.org/) plugin that sends highlight and message
+A [WeeChat](https://weechat.org/) script that sends highlight and message
 notifications through
 [notify-send](http://manpages.ubuntu.com/manpages/vivid/man1/notify-send.1.html).
 It requires [libnotify](https://developer.gnome.org/libnotify/), which provides
@@ -32,9 +32,9 @@ $ ln -s ../notify_send.py
 Options
 -------
 
-The plugin allows you to set the following options, either by running `/set
+The script allows you to set the following options, either by running `/set
 plugins.var.python.notify_send.XXX YYY` or by using the
-[iset.pl](https://weechat.org/scripts/source/iset.pl.html/) plugin.
+[iset.pl](https://weechat.org/scripts/source/iset.pl.html/) script.
 
 * `notify_on_highlights`. Send notifications on highlights. Default: `on`.
 * `notify_on_privmsgs`. Send notifications on private messages. Default: `on`.
