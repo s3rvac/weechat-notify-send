@@ -95,15 +95,16 @@ OPTIONS = {
         'buffer (in milliseconds; set to 0 to show all notifications).'
     ),
     'ignore_messages_tagged_with': (
-        # notify_none:   Buffer with line is not added to hotlist
-        # irc_join:      Joined IRC
-        # irc_quit:      Quit IRC
-        # irc_part:      Parted a channel
-        # irc_status:    Status messages
-        # irc_nick_back: A nick is back on server
-        # irc_401:       No such nick/channel
-        # irc_402:       No such server
-        'notify_none,irc_join,irc_quit,irc_part,irc_status,irc_nick_back,irc_401,irc_402',
+        ','.join([
+            'notify_none',    # Buffer with line is not added to hotlist
+            'irc_join',       # Joined IRC
+            'irc_quit',       # Quit IRC
+            'irc_part',       # Parted a channel
+            'irc_status',     # Status messages
+            'irc_nick_back',  # A nick is back on server
+            'irc_401',        # No such nick/channel
+            'irc_402',        # No such server
+        ]),
         'A comma-separated list of message tags for which no notifications '
         'should be shown.'
     ),
