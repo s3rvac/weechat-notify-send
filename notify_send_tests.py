@@ -245,7 +245,7 @@ class NotificationShouldBeSentTests(TestsBase):
     def notification_should_be_sent(self, buffer='buffer', tags=(), nick='nick',
                                     is_displayed=True, is_highlight=True):
         return notification_should_be_sent(buffer, tags, nick,
-                                           is_displayed, is_highlight)
+                                           is_displayed, is_highlight, '')
 
     def test_returns_false_for_message_from_self(self):
         BUFFER = 'buffer'
