@@ -90,7 +90,7 @@ OPTIONS = {
         'A comma-separated list of buffers for which you want to receive '
         'notifications on all messages that appear in them.'
     ),
-    'notify_on_all_messages_that_match': (
+    'notify_on_messages_that_match': (
         '',
         'A comma-separated list of regex patterns that you want to receive '
         'notifications on when message body matches.'
@@ -289,7 +289,7 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
     if is_highlight:
         return notify_on_highlights()
 
-    if notify_on_all_messages_that_match(message):
+    if notify_on_messages_that_match(message):
         return True
 
     if notify_on_all_messages_in_buffer(buffer):
@@ -298,8 +298,8 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
     return False
 
 
-def notify_on_all_messages_that_match(msg):
-    msg_pttrns = split_option_value('notify_on_all_messages_that_match')
+def notify_on_messages_that_match(msg):
+    msg_pttrns = split_option_value('notify_on_messages_that_match')
     for pttrn in msg_pttrns:
         if pttrn != '' and re.search(pttrn, msg):
             return True
