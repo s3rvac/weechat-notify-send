@@ -55,6 +55,7 @@ from notify_send import nick_separator
 from notify_send import nick_that_sent_message
 from notify_send import notification_should_be_sent
 from notify_send import notify_on_all_messages_in_buffer
+from notify_send import notify_on_messages_that_match
 from notify_send import prepare_notification
 from notify_send import send_notification
 from notify_send import shorten_message
@@ -243,9 +244,9 @@ class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
     def notification_should_be_sent(self, buffer='buffer', tags=(), nick='nick',
-                                    is_displayed=True, is_highlight=True):
+                                    is_displayed=True, is_highlight=True, message=''):
         return notification_should_be_sent(buffer, tags, nick,
-                                           is_displayed, is_highlight, '')
+                                           is_displayed, is_highlight, message)
 
     def test_returns_false_for_message_from_self(self):
         BUFFER = 'buffer'
@@ -273,6 +274,16 @@ class NotificationShouldBeSentTests(TestsBase):
 
         should_be_sent = self.notification_should_be_sent(
             is_displayed=False  # WeeChat marks filtered messages as not displayed.
+        )
+
+        self.assertTrue(should_be_sent)
+
+    def test_returns_true_when_message_matches(self):
+        set_config_option('notify_on_messages_that_match', 'foo')
+
+        should_be_sent = self.notification_should_be_sent(
+            message='foobar',
+            is_highlight=False,
         )
 
         self.assertTrue(should_be_sent)
@@ -693,6 +704,18 @@ class IgnoreNotificationsFromNickTests(TestsBase):
         set_config_option('ignore_nicks_starting_with', '  pre_  ')
 
         self.assertTrue(ignore_notifications_from_nick('pre_nick'))
+
+
+class NotifyOnMessagesThatMatchTests(TestsBase):
+    """Tests for notify_on_messages_that_match()"""
+
+    def test_returns_false_when_list_has_no_patterns(self):
+        set_config_option('notify_on_messages_that_match', '')
+        self.assertFalse(notify_on_messages_that_match("foobar"))
+
+    def test_returns_true_when_message_matches(self):
+        set_config_option('notify_on_messages_that_match', 'foo')
+        self.assertTrue(notify_on_messages_that_match("foobar"))
 
 
 class NotifyOnAllMessagesInBufferTests(TestsBase):
