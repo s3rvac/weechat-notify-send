@@ -28,6 +28,7 @@
 #
 
 import os
+import re
 import subprocess
 import sys
 import time
@@ -88,6 +89,11 @@ OPTIONS = {
         '',
         'A comma-separated list of buffers for which you want to receive '
         'notifications on all messages that appear in them.'
+    ),
+    'notify_on_all_messages_that_match': (
+        '',
+        'A comma-separated list of regex patterns that you want to receive '
+        'notifications on when message body matches.'
     ),
     'min_notification_delay': (
         '500',
@@ -228,17 +234,17 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
     tags = parse_tags(tags)
     nick = nick_that_sent_message(tags, prefix)
 
-    if notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
+    if notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight, message):
         notification = prepare_notification(buffer, nick, message)
         send_notification(notification)
 
     return weechat.WEECHAT_RC_OK
 
 
-def notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
+def notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight, message):
     """Should a notification be sent?"""
     if notification_should_be_sent_disregarding_time(buffer, tags, nick,
-                                                     is_displayed, is_highlight):
+                                                     is_displayed, is_highlight, message):
         # The following function should be called only when the notification
         # should be sent (it updates the last notification time).
         if not is_below_min_notification_delay(buffer):
@@ -247,7 +253,7 @@ def notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight):
 
 
 def notification_should_be_sent_disregarding_time(buffer, tags, nick,
-                                                  is_displayed, is_highlight):
+                                                  is_displayed, is_highlight, message):
     """Should a notification be sent when not considering time?"""
     if not nick:
         # A nick is required to form a correct notification source/message.
@@ -283,8 +289,20 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
     if is_highlight:
         return notify_on_highlights()
 
+    if notify_on_all_messages_that_match(message):
+        return True
+
     if notify_on_all_messages_in_buffer(buffer):
         return True
+
+    return False
+
+
+def notify_on_all_messages_that_match(msg):
+    msg_pttrns = split_option_value('notify_on_all_messages_that_match')
+    for pttrn in msg_pttrns:
+        if pttrn != '' and re.search(pttrn, msg):
+            return True
 
     return False
 
