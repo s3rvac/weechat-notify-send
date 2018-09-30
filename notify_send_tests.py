@@ -1032,13 +1032,13 @@ class SendNotificationTests(TestsBase):
         self.assertNotIn('--urgency', notify_cmd)
 
     def test_prints_error_message_when_notification_sending_fails(self):
-        self.subprocess.check_call.side_effect = FileNotFoundError(
+        self.subprocess.check_call.side_effect = OSError(
             'No such file or directory: notify-send'
         )
 
         send_notification(new_notification())
 
         self.assertIn(
-            'FileNotFoundError: No such file or directory',
+            'OSError: No such file or directory',
             self.print_mock.call_args[0][0]
         )
