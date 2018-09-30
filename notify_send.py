@@ -632,11 +632,19 @@ def send_notification(notification):
     # In Python < 3.3, there is no subprocess.DEVNULL, so we have to use a
     # workaround.
     with open(os.devnull, 'wb') as devnull:
-        subprocess.check_call(
-            notify_cmd,
-            stderr=subprocess.STDOUT,
-            stdout=devnull,
-        )
+        try:
+            subprocess.check_call(
+                notify_cmd,
+                stderr=subprocess.STDOUT,
+                stdout=devnull,
+            )
+        except Exception as ex:
+            error_message = '{} (reason: {!r}). {}'.format(
+                'Failed to send the notification via notify-send',
+                '{}: {}'.format(ex.__class__.__name__, ex),
+                'Ensure that you have notify-send installed in your system.',
+            )
+            print(error_message)
 
 
 if __name__ == '__main__':

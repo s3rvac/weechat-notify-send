@@ -6,6 +6,9 @@ dev
 
 * Added a new default tag into `ignore_messages_tagged_with`: `notify_none` (see
   [#10](https://github.com/s3rvac/weechat-notify-send/issues/10)).
+* Print an error message when `notify-send` fails. From a user's viewpoint,
+  this is better than showing the complete backtrace (see
+  [#11](https://github.com/s3rvac/weechat-notify-send/issues/11)).
 * Replaced the word *plugin* with *script* in README and source files as
   technically, `weechat-notify-send` is a
   [script](https://weechat.org/files/doc/stable/weechat_scripting.en.html#differences_with_c_api),

@@ -954,6 +954,11 @@ class SendNotificationTests(TestsBase):
         self.subprocess = patcher.start()
         self.addCleanup(patcher.stop)
 
+        # Mock print.
+        patcher = mock.patch('notify_send.print')
+        self.print = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_calls_correct_command_when_all_notification_parameters_are_set(self):
         notification = new_notification(
             source='source',
@@ -1025,3 +1030,15 @@ class SendNotificationTests(TestsBase):
 
         notify_cmd = self.subprocess.check_call.call_args[0][0]
         self.assertNotIn('--urgency', notify_cmd)
+
+    def test_prints_error_message_when_notification_sending_fails(self):
+        self.subprocess.check_call.side_effect = FileNotFoundError(
+            'No such file or directory: notify-send'
+        )
+
+        send_notification(new_notification())
+
+        self.assertIn(
+            'FileNotFoundError: No such file or directory',
+            self.print.call_args[0][0]
+        )
