@@ -627,7 +627,7 @@ def send_notification(notification):
     ]
 
     # Prevent notify-send from messing up the WeeChat screen when occasionally
-    # emitting assertion messages by redirecting the output to /dev/null (you
+    # emitting assertion messages by redirecting the output to /dev/null (users
     # would need to run /redraw to fix the screen).
     # In Python < 3.3, there is no subprocess.DEVNULL, so we have to use a
     # workaround.
