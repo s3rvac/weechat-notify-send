@@ -956,7 +956,7 @@ class SendNotificationTests(TestsBase):
 
         # Mock print.
         patcher = mock.patch('notify_send.print')
-        self.print = patcher.start()
+        self.print_mock = patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_calls_correct_command_when_all_notification_parameters_are_set(self):
@@ -1040,5 +1040,5 @@ class SendNotificationTests(TestsBase):
 
         self.assertIn(
             'FileNotFoundError: No such file or directory',
-            self.print.call_args[0][0]
+            self.print_mock.call_args[0][0]
         )
