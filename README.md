@@ -12,7 +12,7 @@ the `notify-send` application.
 
 ![Screenshot](screenshot.png "A sample screenshot.")
 
-Note that the precise appearance depends on the configuration of your
+Note that the exact appearance depends on the configuration of your
 notification system as well as on the used icon.
 
 Installation
