@@ -645,7 +645,7 @@ def send_notification(notification):
                 '{}: {}'.format(ex.__class__.__name__, ex),
                 'Ensure that you have notify-send installed in your system.',
             )
-            print(error_message)
+            print(error_message, file=sys.stderr)
 
 
 if __name__ == '__main__':
