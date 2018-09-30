@@ -4,9 +4,6 @@ Changelog
 dev
 ---
 
-* Dropped support for Python 3.3 ([it is
-  EOL](https://devguide.python.org/#branchstatus)). When using Python 3,
-  require at least Python 3.4.
 * Added a new default tag into `ignore_messages_tagged_with`: `notify_none` (see
   [#10](https://github.com/s3rvac/weechat-notify-send/issues/10)).
 * Replaced the word *plugin* with *script* in README and source files as
@@ -14,6 +11,9 @@ dev
   [script](https://weechat.org/files/doc/stable/weechat_scripting.en.html#differences_with_c_api),
   not a plugin (see
   [#8](https://github.com/s3rvac/weechat-notify-send/issues/8)).
+* Dropped support for Python 3.3 ([it is
+  EOL](https://devguide.python.org/#branchstatus)). When using Python 3,
+  require at least Python 3.4.
 
 0.7 (2016-11-27)
 ----------------
