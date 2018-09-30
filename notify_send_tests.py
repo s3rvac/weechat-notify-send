@@ -955,7 +955,10 @@ class SendNotificationTests(TestsBase):
         self.addCleanup(patcher.stop)
 
         # Mock print.
-        patcher = mock.patch('notify_send.print')
+        if sys.version_info.major == 3:
+            patcher = mock.patch('builtins.print')
+        else:
+            patcher = mock.patch('notify_send.print')
         self.print_mock = patcher.start()
         self.addCleanup(patcher.stop)
 
