@@ -707,7 +707,7 @@ class IgnoreNotificationsFromNickTests(TestsBase):
 
 
 class NotifyOnMessagesThatMatchTests(TestsBase):
-    """Tests for notify_on_messages_that_match()"""
+    """Tests for notify_on_messages_that_match()."""
 
     def test_returns_false_when_list_has_no_patterns(self):
         set_config_option('notify_on_messages_that_match', '')
