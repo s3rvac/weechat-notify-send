@@ -724,6 +724,11 @@ class NotifyOnMessagesThatMatchTests(TestsBase):
 
         self.assertTrue(notify_on_messages_that_match('foobar'))
 
+    def test_re_search_is_used_for_matching(self):
+        set_config_option('notify_on_messages_that_match', 'bar')
+
+        self.assertTrue(notify_on_messages_that_match('foobar'))
+
 
 class NotifyOnAllMessagesInBufferTests(TestsBase):
     """Tests for notify_on_all_messages_in_buffer()."""
