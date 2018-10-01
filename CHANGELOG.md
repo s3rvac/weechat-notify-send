@@ -4,6 +4,10 @@ Changelog
 dev
 ---
 
+* Added a new option: `notify_on_messages_that_match`. It is comma-separated
+  list of regex patterns for which you want to receive notifications for any
+  message whose body matches the given regular expression. Contributed by
+  @bbugyi200 in [#12](https://github.com/s3rvac/weechat-notify-send/pulls/12).
 * Added a new default tag into `ignore_messages_tagged_with`: `notify_none` (see
   [#10](https://github.com/s3rvac/weechat-notify-send/issues/10)).
 * Print an error message when `notify-send` fails. From a user's viewpoint,
