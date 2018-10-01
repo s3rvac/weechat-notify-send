@@ -29,7 +29,7 @@ Installation
 
 * Put the
   [`notify_send.py`](https://raw.githubusercontent.com/s3rvac/weechat-notify-send/master/notify_send.py)
-  script to `~/.weechat/python/`
+  script to `~/.weechat/python/`.
 * Add a symbolic link to it in the `~/.weechat/python/autoload/` directory
   to make the script load automatically when WeeChat starts:
 
