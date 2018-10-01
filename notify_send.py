@@ -425,6 +425,10 @@ def split_option_value(option, separator=','):
     returns the result in a list.
     """
     values = weechat.config_get_plugin(option)
+    if not values:
+        # When there are no values, return the empty list instead of [''].
+        return []
+
     return [value.strip() for value in values.split(separator)]
 
 
@@ -502,7 +506,7 @@ def notify_on_messages_that_match(message):
     """
     message_patterns = split_option_value('notify_on_messages_that_match')
     for pattern in message_patterns:
-        if pattern != '' and re.search(pattern, message):
+        if re.search(pattern, message):
             return True
 
     return False
