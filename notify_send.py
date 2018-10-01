@@ -299,18 +299,6 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
     return False
 
 
-def notify_on_messages_that_match(msg):
-    """Should we send a notification for the given message, provided it matches
-    any of the requested patterns?
-    """
-    msg_pttrns = split_option_value('notify_on_messages_that_match')
-    for pttrn in msg_pttrns:
-        if pttrn != '' and re.search(pttrn, msg):
-            return True
-
-    return False
-
-
 def is_below_min_notification_delay(buffer):
     """Is a notification in the given buffer below the minimal delay between
     successive notifications from the same buffer?
@@ -506,6 +494,18 @@ def ignored_nick_prefixes():
     """
     for prefix in split_option_value('ignore_nicks_starting_with'):
         yield prefix
+
+
+def notify_on_messages_that_match(msg):
+    """Should we send a notification for the given message, provided it matches
+    any of the requested patterns?
+    """
+    msg_pttrns = split_option_value('notify_on_messages_that_match')
+    for pttrn in msg_pttrns:
+        if pttrn != '' and re.search(pttrn, msg):
+            return True
+
+    return False
 
 
 def buffers_to_notify_on_all_messages():
