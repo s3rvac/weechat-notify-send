@@ -712,12 +712,12 @@ class NotifyOnMessagesThatMatchTests(TestsBase):
     def test_returns_false_when_list_has_no_patterns(self):
         set_config_option('notify_on_messages_that_match', '')
 
-        self.assertFalse(notify_on_messages_that_match("foobar"))
+        self.assertFalse(notify_on_messages_that_match('foobar'))
 
     def test_returns_true_when_message_matches(self):
         set_config_option('notify_on_messages_that_match', 'foo')
 
-        self.assertTrue(notify_on_messages_that_match("foobar"))
+        self.assertTrue(notify_on_messages_that_match('foobar'))
 
 
 class NotifyOnAllMessagesInBufferTests(TestsBase):
