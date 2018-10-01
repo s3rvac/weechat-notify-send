@@ -300,6 +300,9 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
 
 
 def notify_on_messages_that_match(msg):
+    """Should we send a notification for the given message, provided it matches
+    any of the requested patterns?
+    """
     msg_pttrns = split_option_value('notify_on_messages_that_match')
     for pttrn in msg_pttrns:
         if pttrn != '' and re.search(pttrn, msg):
