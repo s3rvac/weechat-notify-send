@@ -58,7 +58,9 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   Default: `''`.
 * `notify_on_messages_that_match`: A comma-separated list of regex patterns for
   which you want to receive notifications for any message whose body matches
-  the given regular expression. Default: `''`.
+  the given regular expression. The matching is done via
+  [`re.search()`](https://docs.python.org/3/library/re.html#re.search).
+  Default: `''`.
 * `min_notification_delay`. A minimal delay in milliseconds between successive
   notifications from the same buffer. It is used to protect from floods/spam.
   Set it to `0` to disable this feature (i.e. all notifications will be shown).
