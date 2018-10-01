@@ -33,10 +33,10 @@ Installation
 * Add a symbolic link to it in the `~/.weechat/python/autoload/` directory
   to make the script load automatically when WeeChat starts:
 
-```
-$ cd ~/.weechat/python/autoload
-$ ln -s ../notify_send.py
-```
+    ```
+    $ cd ~/.weechat/python/autoload
+    $ ln -s ../notify_send.py
+    ```
 
 Options
 -------
