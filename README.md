@@ -20,7 +20,7 @@ Requirements
 
 * Python 2.7 or Python >= 3.4 (either CPython or PyPy)
 * `notify-send` provided by [libnotify](https://developer.gnome.org/libnotify/)
-    * Debian: [libnotify-bin](https://packages.debian.org/stretch/amd64/libnotify-bin)
+    * Debian: [libnotify-bin](https://packages.debian.org/stretch/libnotify-bin)
     * Ubuntu: [libnotify-bin](https://packages.ubuntu.com/bionic/libnotify-bin)
     * Arch Linux: [extra/libnotify](https://www.archlinux.org/packages/extra/x86_64/libnotify/)
 
