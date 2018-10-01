@@ -496,13 +496,13 @@ def ignored_nick_prefixes():
         yield prefix
 
 
-def notify_on_messages_that_match(msg):
+def notify_on_messages_that_match(message):
     """Should we send a notification for the given message, provided it matches
     any of the requested patterns?
     """
-    msg_pttrns = split_option_value('notify_on_messages_that_match')
-    for pttrn in msg_pttrns:
-        if pttrn != '' and re.search(pttrn, msg):
+    message_patterns = split_option_value('notify_on_messages_that_match')
+    for pattern in message_patterns:
+        if pattern != '' and re.search(pattern, message):
             return True
 
     return False
