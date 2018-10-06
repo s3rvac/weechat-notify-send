@@ -14,6 +14,6 @@ install:
   - pip install nose
 script:
   - nosetests notify_send_tests.py --with-coverage --cover-package=notify_send --cover-erase
-  - flake8 --ignore=E402,E501 notify_send.py notify_send_tests.py
+  - flake8 --ignore=E402 --max-line-length=100 notify_send.py notify_send_tests.py
 after_success:
   - coveralls

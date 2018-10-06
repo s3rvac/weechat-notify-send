@@ -21,7 +21,7 @@ clean:
 	@rm -rf .coverage coverage
 
 lint:
-	@flake8 --ignore=E402,E501 notify_send.py notify_send_tests.py
+	@flake8 --ignore=E402 --max-line-length=100 notify_send.py notify_send_tests.py
 
 tests:
 	@nosetests notify_send_tests.py
