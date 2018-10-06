@@ -91,6 +91,11 @@ OPTIONS = {
         'A comma-separated list of buffers for which you want to receive '
         'notifications on all messages that appear in them.'
     ),
+    'notify_on_all_messages_in_buffers_that_match': (
+        '',
+        'A comma-separated list of regex patterns of buffers for which you '
+        'want to receive notifications on all messages that appear in them.'
+    ),
     'notify_on_messages_that_match': (
         '',
         'A comma-separated list of regex patterns that you want to receive '
@@ -520,13 +525,30 @@ def buffers_to_notify_on_all_messages():
         yield buffer
 
 
+def buffer_patterns_to_notify_on_all_messages():
+    """A generator of buffer-name patterns in which the user wants to be
+    notifier for all messages.
+    """
+    for pattern in split_option_value('notify_on_all_messages_in_buffers_that_match'):
+        yield pattern
+
+
 def notify_on_all_messages_in_buffer(buffer):
     """Does the user want to be notified for all messages in the given buffer?
     """
     buffer_names = names_for_buffer(buffer)
+
+    # Option notify_on_all_messages_in_buffers:
     for buf in buffers_to_notify_on_all_messages():
         if buf in buffer_names:
             return True
+
+    # Option notify_on_all_messages_in_buffers_that_match:
+    for pattern in buffer_patterns_to_notify_on_all_messages():
+        for buf in buffer_names:
+            if re.search(pattern, buf):
+                return True
+
     return False
 
 

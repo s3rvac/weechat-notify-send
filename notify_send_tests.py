@@ -124,6 +124,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('notify_on_all_messages_in_buffers', '')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', '')
         set_config_option('notify_on_messages_that_match', '')
         set_config_option('min_notification_delay', '0')
         set_config_option('ignore_messages_tagged_with', '')
@@ -734,11 +735,12 @@ class NotifyOnMessagesThatMatchTests(TestsBase):
 class NotifyOnAllMessagesInBufferTests(TestsBase):
     """Tests for notify_on_all_messages_in_buffer()."""
 
-    def test_returns_false_when_list_does_not_contain_any_buffer(self):
+    def test_returns_false_when_options_do_not_contain_any_buffer(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'name', 'network.#buffer')
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('notify_on_all_messages_in_buffers', '')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', '')
 
         self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
 
@@ -747,10 +749,11 @@ class NotifyOnAllMessagesInBufferTests(TestsBase):
         set_buffer_string(BUFFER, 'name', '')
         set_buffer_string(BUFFER, 'short_name', '')
         set_config_option('notify_on_all_messages_in_buffers', '')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', '')
 
         self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
 
-    def test_returns_false_when_buffer_is_not_in_list(self):
+    def test_returns_false_when_buffer_is_not_in_buffer_list(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'name', 'network.#buffer')
         set_buffer_string(BUFFER, 'short_name', '#buffer')
@@ -758,7 +761,15 @@ class NotifyOnAllMessagesInBufferTests(TestsBase):
 
         self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
 
-    def test_returns_true_when_buffer_short_name_is_in_list(self):
+    def test_returns_false_when_buffer_does_not_match_any_pattern_in_buffer_pattern_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', r'#a.*,#c.*')
+
+        self.assertFalse(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_short_name_is_in_buffer_list(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'name', 'network.#buffer')
         set_buffer_string(BUFFER, 'short_name', '#buffer')
@@ -766,7 +777,15 @@ class NotifyOnAllMessagesInBufferTests(TestsBase):
 
         self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
 
-    def test_returns_true_when_buffer_full_name_is_in_list(self):
+    def test_returns_true_when_buffer_short_name_matches_one_in_buffer_pattern_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', r'#a.*,#buf.*')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_returns_true_when_buffer_full_name_is_in_buffer_list(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'name', 'network.#buffer')
         set_buffer_string(BUFFER, 'short_name', '#buffer')
@@ -774,11 +793,27 @@ class NotifyOnAllMessagesInBufferTests(TestsBase):
 
         self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
 
-    def test_strips_beginning_and_trailing_whitespace_from_buffers_in_list(self):
+    def test_returns_true_when_buffer_full_name_matches_one_in_buffer_pattern_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', r'#a.*,network\.#buf.*')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_strips_beginning_and_trailing_whitespace_from_buffers_in_buffer_list(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'name', 'network.#buffer')
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('notify_on_all_messages_in_buffers', '  #buffer  ')
+
+        self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
+
+    def test_strips_beginning_and_trailing_whitespace_from_patterns_in_buffer_pattern_list(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'name', 'network.#buffer')
+        set_buffer_string(BUFFER, 'short_name', '#buffer')
+        set_config_option('notify_on_all_messages_in_buffers_that_match', '  #buf.*  ')
 
         self.assertTrue(notify_on_all_messages_in_buffer(BUFFER))
 
