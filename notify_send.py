@@ -34,6 +34,7 @@ import re
 import subprocess
 import sys
 import time
+import re
 
 
 # Ensure that we are running under WeeChat.
@@ -525,8 +526,9 @@ def notify_on_all_messages_in_buffer(buffer):
     """
     buffer_names = names_for_buffer(buffer)
     for buf in buffers_to_notify_on_all_messages():
-        if buf in buffer_names:
-            return True
+        for n in buffer_names:
+            if re.compile(buf).match(n):
+                return True
     return False
 
 
