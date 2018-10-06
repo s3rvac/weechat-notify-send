@@ -4,7 +4,7 @@ Changelog
 dev
 ---
 
-* Added a new option: `notify_on_messages_that_match`. It is comma-separated
+* Added a new option: `notify_on_messages_that_match`. It is a comma-separated
   list of regex patterns for which you want to receive notifications for any
   message whose body matches the given regular expression. Contributed by
   [@bbugyi200](https://github.com/bbugyi200) in
