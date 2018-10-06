@@ -124,6 +124,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
         set_config_option('notify_on_all_messages_in_buffers', '')
+        set_config_option('notify_on_messages_that_match', '')
         set_config_option('min_notification_delay', '0')
         set_config_option('ignore_messages_tagged_with', '')
         set_config_option('ignore_buffers', '')
