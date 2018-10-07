@@ -4,6 +4,11 @@ Changelog
 dev
 ---
 
+-
+
+0.8 (2018-10-07)
+----------------
+
 * Added a new option: `notify_on_all_messages_in_buffers_that_match`. It is a
   comma-separated list of regex patterns of buffers for which you want to
   receive notifications on all messages that appear in them.
