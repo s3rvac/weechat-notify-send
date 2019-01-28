@@ -62,8 +62,9 @@ from notify_send import shorten_message
 
 
 def new_notification(source='source', message='message', icon='icon.png',
-                     timeout=5000, transient=True, urgency='normal'):
-    return Notification(source, message, icon, timeout, transient, urgency)
+                     desktop_entry="desktop", timeout=5000, transient=True,
+                     urgency='normal'):
+    return Notification(source, message, icon, desktop_entry, timeout, transient, urgency)
 
 
 def set_config_option(option, value):
@@ -1038,6 +1039,7 @@ class SendNotificationTests(TestsBase):
             source='source',
             message='message',
             icon='icon.png',
+            desktop_entry='desktop-id',
             timeout=5000,
             transient=True,
             urgency='normal'
@@ -1054,6 +1056,7 @@ class SendNotificationTests(TestsBase):
                 'notify-send',
                 '--app-name', 'weechat',
                 '--icon', 'icon.png',
+                '--hint', 'string:desktop-entry:desktop-id',
                 '--expire-time', '5000',
                 '--hint', 'int:transient:1',
                 '--urgency', 'normal',

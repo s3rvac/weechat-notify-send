@@ -160,6 +160,10 @@ OPTIONS = {
         '/usr/share/icons/hicolor/32x32/apps/weechat.png',
         'Path to an icon to be shown in notifications.'
     ),
+    'desktop-entry': (
+        'weechat',
+        'The desktop id for the weechat instance'
+    ),
     'timeout': (
         '5000',
         'Time after which the notification disappears (in milliseconds; '
@@ -180,10 +184,11 @@ OPTIONS = {
 class Notification(object):
     """A representation of a notification."""
 
-    def __init__(self, source, message, icon, timeout, transient, urgency):
+    def __init__(self, source, message, icon, desktop_entry, timeout, transient, urgency):
         self.source = source
         self.message = message
         self.icon = icon
+        self.desktop_entry = desktop_entry
         self.timeout = timeout
         self.transient = transient
         self.urgency = urgency
@@ -572,11 +577,12 @@ def prepare_notification(buffer, nick, message):
     message = escape_slashes(message)
 
     icon = weechat.config_get_plugin('icon')
+    desktop_entry = weechat.config_get_plugin('icon')
     timeout = weechat.config_get_plugin('timeout')
     transient = should_notifications_be_transient()
     urgency = weechat.config_get_plugin('urgency')
 
-    return Notification(source, message, icon, timeout, transient, urgency)
+    return Notification(source, message, icon, desktop_entry, timeout, transient, urgency)
 
 
 def should_notifications_be_transient():
@@ -657,6 +663,8 @@ def send_notification(notification):
     notify_cmd = ['notify-send', '--app-name', 'weechat']
     if notification.icon:
         notify_cmd += ['--icon', notification.icon]
+    if notification.desktop_entry:
+        notify_cmd += ['--hint', 'string:desktop-entry:{}'.format(notification.desktop_entry)]
     if notification.timeout:
         notify_cmd += ['--expire-time', str(notification.timeout)]
     if notification.transient:
