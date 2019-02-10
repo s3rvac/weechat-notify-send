@@ -13,7 +13,7 @@ install:
   - pip install mock
   - pip install nose
 script:
-  - nosetests notify_send_tests.py --with-coverage --cover-package=notify_send --cover-erase
+  - make tests-coverage
   - make lint
 after_success:
   - coveralls
