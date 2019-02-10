@@ -10,7 +10,7 @@ notifications through
 It requires [libnotify](https://developer.gnome.org/libnotify/), which provides
 the `notify-send` application.
 
-![Screenshot](screenshot.png "A sample screenshot.")
+![Screenshot](screenshot.png "A screenshot from my desktop.")
 
 Note that the exact appearance depends on the configuration of your
 notification system as well as on the used icon.
