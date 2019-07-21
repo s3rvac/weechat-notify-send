@@ -82,6 +82,9 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   should be shown. Default: `''`.
 * `ignore_nicks_starting_with`: A comma-separated list of nick prefixes from
   which no notifications should be shown. Default: `''`.
+* `hide_message_bodies_in_buffers_that_match`: A comma-separated list of regex
+  patterns for names of buffers from which you want to receive notifications
+  without message bodies. Default: `''`.
 * `nick_separator`: A separator to be put between a nick and a message.
   Default: `: `.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML

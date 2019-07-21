@@ -133,6 +133,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('ignore_buffers_starting_with', '')
         set_config_option('ignore_nicks', '')
         set_config_option('ignore_nicks_starting_with', '')
+        set_config_option('hide_message_bodies_in_buffers_that_match', '')
         set_config_option('nick_separator', '')
         set_config_option('escape_html', 'off')
         set_config_option('max_length', '0')
@@ -960,6 +961,33 @@ class PrepareNotificationTests(TestsBase):
         notification = self.prepare_notification(message='<>')
 
         self.assertEqual(notification.message, '<>')
+
+    def test_hides_message_body_when_buffer_name_matches_regex_in_option(self):
+        BUFFER = 'defghijk'
+        set_buffer_string(BUFFER, 'short_name', '#' + BUFFER)
+        set_config_option('hide_message_bodies_in_buffers_that_match', 'abc,def.*ijk,xyz')
+
+        notification = self.prepare_notification(BUFFER, message='hello')
+
+        self.assertEqual(notification.message, '')
+
+    def test_does_not_hide_message_body_when_buffer_name_does_not_match_regex_in_option(self):
+        BUFFER = 'foo'
+        set_buffer_string(BUFFER, 'short_name', '#' + BUFFER)
+        set_config_option('hide_message_bodies_in_buffers_that_match', 'abc,def.*ijk,xyz')
+
+        notification = self.prepare_notification(BUFFER, message='hello')
+
+        self.assertEqual(notification.message, 'hello')
+
+    def test_does_not_hide_message_body_when_option_is_empty(self):
+        BUFFER = 'foo'
+        set_buffer_string(BUFFER, 'short_name', '#' + BUFFER)
+        set_config_option('hide_message_bodies_in_buffers_that_match', '')
+
+        notification = self.prepare_notification(BUFFER, message='hello')
+
+        self.assertEqual(notification.message, 'hello')
 
 
 class NickSeparatorTests(TestsBase):

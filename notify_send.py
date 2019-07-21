@@ -140,6 +140,11 @@ OPTIONS = {
         'A comma-separated list of nick prefixes from which no '
         'notifications should be shown.'
     ),
+    'hide_message_bodies_in_buffers_that_match': (
+        '',
+        'A comma-separated list of regex patterns for names of buffers from '
+        'which you want to receive notifications without message bodies.'
+    ),
     'nick_separator': (
         ': ',
         'A separator between a nick and a message.'
@@ -557,6 +562,26 @@ def notify_on_all_messages_in_buffer(buffer):
     return False
 
 
+def buffer_patterns_to_hide_message_body():
+    """A generator of buffer-name patterns in which the user wants to hide
+    message bodies.
+    """
+    for pattern in split_option_value('hide_message_bodies_in_buffers_that_match'):
+        yield pattern
+
+
+def hide_message_body_in_buffer(buffer):
+    """Should we hide the body of messages in the given buffer?"""
+    buffer_names = names_for_buffer(buffer)
+
+    for pattern in buffer_patterns_to_hide_message_body():
+        for buf in buffer_names:
+            if re.search(pattern, buf):
+                return True
+
+    return False
+
+
 def prepare_notification(buffer, nick, message):
     """Prepares a notification from the given data."""
     if is_private_message(buffer):
@@ -565,6 +590,9 @@ def prepare_notification(buffer, nick, message):
         source = (weechat.buffer_get_string(buffer, 'short_name') or
                   weechat.buffer_get_string(buffer, 'name'))
         message = nick + nick_separator() + message
+
+    if hide_message_body_in_buffer(buffer):
+        message = ''
 
     max_length = int(weechat.config_get_plugin('max_length'))
     if max_length > 0:

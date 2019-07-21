@@ -4,6 +4,10 @@ Changelog
 dev
 ---
 
+* Added a new option: `hide_message_bodies_in_buffers_that_match`. It is a
+  comma-separated list of regex patterns for names of buffers from which you
+  want to receive notifications without message bodies
+  ([#19](https://github.com/s3rvac/weechat-notify-send/issues/19)).
 * Added a new option: `desktop_entry`. It contains the name of the desktop
   entry for WeeChat. This enables `notify-send` to focus WeeChat upon clicking
   on a notification
