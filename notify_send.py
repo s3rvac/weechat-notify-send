@@ -469,7 +469,7 @@ def ignore_notifications_from_buffer(buffer):
 
     for buffer_name in buffer_names:
         for prefix in ignored_buffer_prefixes():
-            if prefix and buffer_name and buffer_name.startswith(prefix):
+            if prefix and buffer_name.startswith(prefix):
                 return True
 
     return False
