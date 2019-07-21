@@ -29,7 +29,7 @@ dev
   [#8](https://github.com/s3rvac/weechat-notify-send/issues/8)).
 * Dropped support for Python 3.3 ([it is
   EOL](https://devguide.python.org/#branchstatus)). When using Python 3,
-  require at least Python 3.4.
+  at least Python 3.4 is required.
 
 0.7 (2016-11-27)
 ----------------
