@@ -62,7 +62,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   [`re.search()`](https://docs.python.org/3/library/re.html#re.search).
   Default: `''`.
 * `notify_on_messages_that_match`: A comma-separated list of regex patterns for
-  which you want to receive notifications for any message whose body matches
+  which you want to receive notifications for any message that matches
   the given regular expression. The matching is done via
   [`re.search()`](https://docs.python.org/3/library/re.html#re.search).
   Default: `''`.
@@ -82,9 +82,9 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   should be shown. Default: `''`.
 * `ignore_nicks_starting_with`: A comma-separated list of nick prefixes from
   which no notifications should be shown. Default: `''`.
-* `hide_message_bodies_in_buffers_that_match`: A comma-separated list of regex
+* `hide_messages_in_buffers_that_match`: A comma-separated list of regex
   patterns for names of buffers from which you want to receive notifications
-  without message bodies. Default: `''`.
+  without messages. Default: `''`.
 * `nick_separator`: A separator to be put between a nick and a message.
   Default: `: `.
 * `escape_html`: Escapes the `<`, `>`, and `&` HTML

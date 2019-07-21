@@ -4,9 +4,9 @@ Changelog
 dev
 ---
 
-* Added a new option: `hide_message_bodies_in_buffers_that_match`. It is a
+* Added a new option: `hide_messages_in_buffers_that_match`. It is a
   comma-separated list of regex patterns for names of buffers from which you
-  want to receive notifications without message bodies
+  want to receive notifications without messages
   ([#19](https://github.com/s3rvac/weechat-notify-send/issues/19)).
 * Added a new option: `desktop_entry`. It contains the name of the desktop
   entry for WeeChat. This enables `notify-send` to focus WeeChat upon clicking
@@ -24,7 +24,7 @@ dev
   receive notifications on all messages that appear in them.
 * Added a new option: `notify_on_messages_that_match`. It is a comma-separated
   list of regex patterns for which you want to receive notifications for any
-  message whose body matches the given regular expression. Contributed by
+  message that matches the given regular expression. Contributed by
   [@bbugyi200](https://github.com/bbugyi200) in
   [#12](https://github.com/s3rvac/weechat-notify-send/pulls/12).
 * Added a new default tag into `ignore_messages_tagged_with`: `notify_none` (see

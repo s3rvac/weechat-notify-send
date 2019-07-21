@@ -99,7 +99,7 @@ OPTIONS = {
     'notify_on_messages_that_match': (
         '',
         'A comma-separated list of regex patterns that you want to receive '
-        'notifications on when message body matches.'
+        'notifications on when message matches.'
     ),
     'min_notification_delay': (
         '500',
@@ -140,10 +140,10 @@ OPTIONS = {
         'A comma-separated list of nick prefixes from which no '
         'notifications should be shown.'
     ),
-    'hide_message_bodies_in_buffers_that_match': (
+    'hide_messages_in_buffers_that_match': (
         '',
         'A comma-separated list of regex patterns for names of buffers from '
-        'which you want to receive notifications without message bodies.'
+        'which you want to receive notifications without messages.'
     ),
     'nick_separator': (
         ': ',
@@ -562,19 +562,19 @@ def notify_on_all_messages_in_buffer(buffer):
     return False
 
 
-def buffer_patterns_to_hide_message_body():
+def buffer_patterns_to_hide_messages():
     """A generator of buffer-name patterns in which the user wants to hide
-    message bodies.
+    messages.
     """
-    for pattern in split_option_value('hide_message_bodies_in_buffers_that_match'):
+    for pattern in split_option_value('hide_messages_in_buffers_that_match'):
         yield pattern
 
 
-def hide_message_body_in_buffer(buffer):
-    """Should we hide the body of messages in the given buffer?"""
+def hide_message_in_buffer(buffer):
+    """Should we hide messages in the given buffer?"""
     buffer_names = names_for_buffer(buffer)
 
-    for pattern in buffer_patterns_to_hide_message_body():
+    for pattern in buffer_patterns_to_hide_messages():
         for buf in buffer_names:
             if re.search(pattern, buf):
                 return True
@@ -591,7 +591,7 @@ def prepare_notification(buffer, nick, message):
                   weechat.buffer_get_string(buffer, 'name'))
         message = nick + nick_separator() + message
 
-    if hide_message_body_in_buffer(buffer):
+    if hide_message_in_buffer(buffer):
         message = ''
 
     max_length = int(weechat.config_get_plugin('max_length'))
