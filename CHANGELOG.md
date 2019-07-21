@@ -4,7 +4,9 @@ Changelog
 dev
 ---
 
--
+* Dropped support for Python 3.4 ([it is
+  EOL](https://www.python.org/downloads/release/python-3410/)). When using
+  Python 3, at least Python 3.5 is required.
 
 0.8 (2018-10-07)
 ----------------
