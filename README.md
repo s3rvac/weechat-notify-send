@@ -92,6 +92,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   Default: `[..]`.
 * `icon`: A path to an icon to be shown in notifications. Default:
   `/usr/share/icons/hicolor/32x32/apps/weechat.png`.
+* `desktop_entry`: Name of the desktop entry for WeeChat. Default: `weechat`.
 * `timeout`: Time after which the notification disappears (in milliseconds).
   Set it to 0 to disable the timeout. Default: 5000 (5 seconds).
 * `transient`: When a notification expires or is dismissed, remove it from the

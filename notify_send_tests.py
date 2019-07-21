@@ -62,8 +62,9 @@ from notify_send import shorten_message
 
 
 def new_notification(source='source', message='message', icon='icon.png',
-                     timeout=5000, transient=True, urgency='normal'):
-    return Notification(source, message, icon, timeout, transient, urgency)
+                     desktop_entry='weechat', timeout=5000, transient=True,
+                     urgency='normal'):
+    return Notification(source, message, icon, desktop_entry, timeout, transient, urgency)
 
 
 def set_config_option(option, value):
@@ -137,6 +138,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('max_length', '0')
         set_config_option('ellipsis', '')
         set_config_option('icon', '')
+        set_config_option('desktop_entry', '')
         set_config_option('timeout', '0')
         set_config_option('transient', 'on')
         set_config_option('urgency', '')
@@ -883,6 +885,14 @@ class PrepareNotificationTests(TestsBase):
 
         self.assertEqual(notification.icon, ICON)
 
+    def test_notification_has_correct_desktop_entry(self):
+        DESKTOP_ENTRY = 'weechat'
+        set_config_option('desktop_entry', DESKTOP_ENTRY)
+
+        notification = self.prepare_notification()
+
+        self.assertEqual(notification.desktop_entry, DESKTOP_ENTRY)
+
     def test_notification_has_correct_timeout(self):
         TIMEOUT = 1000
         set_config_option('timeout', TIMEOUT)
@@ -1038,6 +1048,7 @@ class SendNotificationTests(TestsBase):
             source='source',
             message='message',
             icon='icon.png',
+            desktop_entry='weechat',
             timeout=5000,
             transient=True,
             urgency='normal'
@@ -1054,6 +1065,7 @@ class SendNotificationTests(TestsBase):
                 'notify-send',
                 '--app-name', 'weechat',
                 '--icon', 'icon.png',
+                '--hint', 'string:desktop-entry:weechat',
                 '--expire-time', '5000',
                 '--hint', 'int:transient:1',
                 '--urgency', 'normal',
@@ -1080,6 +1092,14 @@ class SendNotificationTests(TestsBase):
 
         notify_cmd = self.subprocess.check_call.call_args[0][0]
         self.assertNotIn('--icon', notify_cmd)
+
+    def test_does_not_include_desktop_entry_in_command_when_it_is_not_set(self):
+        notification = new_notification(desktop_entry='')
+
+        send_notification(notification)
+
+        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        self.assertNotIn('desktop-entry', notify_cmd)
 
     def test_does_not_include_expire_time_in_command_when_timeout_is_not_set(self):
         notification = new_notification(timeout='')

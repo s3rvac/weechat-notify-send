@@ -4,6 +4,10 @@ Changelog
 dev
 ---
 
+* Added a new option: `desktop_entry`. It contains the name of the desktop
+  entry for WeeChat. This enables `notify-send` to focus WeeChat upon clicking
+  on a notification
+  ([#14](https://github.com/s3rvac/weechat-notify-send/issues/14)).
 * Dropped support for Python 3.4 ([it is
   EOL](https://www.python.org/downloads/release/python-3410/)). When using
   Python 3, at least Python 3.5 is required.
