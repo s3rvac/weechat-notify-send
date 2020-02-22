@@ -124,6 +124,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_on_filtered_messages', 'off')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
+        set_config_option('notify_on_all_messages_in_current_buffer', 'on')
         set_config_option('notify_on_all_messages_in_buffers', '')
         set_config_option('notify_on_all_messages_in_buffers_that_match', '')
         set_config_option('notify_on_messages_that_match', '')
@@ -303,6 +304,24 @@ class NotificationShouldBeSentTests(TestsBase):
 
     def test_returns_false_when_highlight_in_current_buffer_and_option_is_off(self):
         set_config_option('notify_for_current_buffer', 'off')
+        BUFFER = 'buffer'
+        weechat.current_buffer.return_value = BUFFER
+
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
+
+        self.assertFalse(should_be_sent)
+
+    def test_returns_true_when_in_curr_buf_and_notify_on_all_msgs_in_curr_buf_is_on(self):
+        set_config_option('notify_on_all_messages_in_current_buffer', 'on')
+        BUFFER = 'buffer'
+        weechat.current_buffer.return_value = BUFFER
+
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
+
+        self.assertTrue(should_be_sent)
+
+    def test_returns_false_when_in_curr_buf_and_notify_on_all_msgs_in_curr_buf_is_off(self):
+        set_config_option('notify_on_all_messages_in_current_buffer', 'off')
         BUFFER = 'buffer'
         weechat.current_buffer.return_value = BUFFER
 

@@ -86,6 +86,10 @@ OPTIONS = {
         'on',
         'Send also notifications for the currently active buffer.'
     ),
+    'notify_on_all_messages_in_current_buffer': (
+        'off',
+        'Send a notification on all messages in the currently active buffer.'
+    ),
     'notify_on_all_messages_in_buffers': (
         '',
         'A comma-separated list of buffers for which you want to receive '
@@ -298,6 +302,8 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
     if buffer == weechat.current_buffer():
         if not notify_for_current_buffer():
             return False
+        elif notify_on_all_messages_in_current_buffer():
+            return True
 
     if is_private_message(buffer):
         return notify_on_private_messages()
@@ -398,6 +404,11 @@ def names_for_buffer(buffer):
 def notify_for_current_buffer():
     """Should we also send notifications for the current buffer?"""
     return weechat.config_get_plugin('notify_for_current_buffer') == 'on'
+
+
+def notify_on_all_messages_in_current_buffer():
+    """Should we send a notication on all messages in the current buffer?"""
+    return weechat.config_get_plugin('notify_on_all_messages_in_current_buffer') == 'on'
 
 
 def notify_on_highlights():
