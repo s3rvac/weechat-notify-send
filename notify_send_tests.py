@@ -124,6 +124,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('notify_on_filtered_messages', 'off')
         set_config_option('notify_when_away', 'on')
         set_config_option('notify_for_current_buffer', 'on')
+        set_config_option('notify_on_all_messages_in_current_buffer', 'on')
         set_config_option('notify_on_all_messages_in_buffers', '')
         set_config_option('notify_on_all_messages_in_buffers_that_match', '')
         set_config_option('notify_on_messages_that_match', '')
@@ -249,7 +250,7 @@ class NotificationShouldBeSentTests(TestsBase):
     """Tests for notification_should_be_sent()."""
 
     def notification_should_be_sent(self, buffer='buffer', tags=(), nick='nick',
-                                    is_displayed=True, is_highlight=True, message=''):
+                                    is_displayed=True, is_highlight=False, message=''):
         return notification_should_be_sent(buffer, tags, nick,
                                            is_displayed, is_highlight, message)
 
@@ -269,6 +270,7 @@ class NotificationShouldBeSentTests(TestsBase):
         set_config_option('notify_on_filtered_messages', 'off')
 
         should_be_sent = self.notification_should_be_sent(
+            is_highlight=True,
             is_displayed=False  # WeeChat marks filtered messages as not displayed.
         )
 
@@ -278,6 +280,7 @@ class NotificationShouldBeSentTests(TestsBase):
         set_config_option('notify_on_filtered_messages', 'on')
 
         should_be_sent = self.notification_should_be_sent(
+            is_highlight=True,
             is_displayed=False  # WeeChat marks filtered messages as not displayed.
         )
 
@@ -286,10 +289,7 @@ class NotificationShouldBeSentTests(TestsBase):
     def test_returns_true_when_message_matches(self):
         set_config_option('notify_on_messages_that_match', 'foo')
 
-        should_be_sent = self.notification_should_be_sent(
-            message='foobar',
-            is_highlight=False,
-        )
+        should_be_sent = self.notification_should_be_sent(message='foobar')
 
         self.assertTrue(should_be_sent)
 
@@ -311,15 +311,30 @@ class NotificationShouldBeSentTests(TestsBase):
 
         self.assertFalse(should_be_sent)
 
+    def test_returns_true_when_in_curr_buf_and_notify_on_all_msgs_in_curr_buf_is_on(self):
+        set_config_option('notify_on_all_messages_in_current_buffer', 'on')
+        BUFFER = 'buffer'
+        weechat.current_buffer.return_value = BUFFER
+
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
+
+        self.assertTrue(should_be_sent)
+
+    def test_returns_false_when_in_curr_buf_and_notify_on_all_msgs_in_curr_buf_is_off(self):
+        set_config_option('notify_on_all_messages_in_current_buffer', 'off')
+        BUFFER = 'buffer'
+        weechat.current_buffer.return_value = BUFFER
+
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
+
+        self.assertFalse(should_be_sent)
+
     def test_returns_false_when_ordinary_message_in_buffer_not_in_list(self):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('notify_on_all_messages_in_buffers', '')
 
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_highlight=False
-        )
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
 
@@ -328,10 +343,7 @@ class NotificationShouldBeSentTests(TestsBase):
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('notify_on_all_messages_in_buffers', '#buffer')
 
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_highlight=False
-        )
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertTrue(should_be_sent)
 
@@ -339,20 +351,14 @@ class NotificationShouldBeSentTests(TestsBase):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', '')
 
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_highlight=False
-        )
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
 
     def test_returns_false_when_nick_is_missing(self):
         set_config_option('notify_on_highlights', 'on')
 
-        should_be_sent = self.notification_should_be_sent(
-            nick='',
-            is_highlight=True
-        )
+        should_be_sent = self.notification_should_be_sent(nick='')
 
         self.assertFalse(should_be_sent)
 
@@ -373,10 +379,7 @@ class NotificationShouldBeSentTests(TestsBase):
         set_buffer_string(BUFFER, 'short_name', '#buffer')
         set_config_option('ignore_buffers', '#buffer')
 
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_highlight=True
-        )
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
 
@@ -410,10 +413,7 @@ class NotificationShouldBeSentTests(TestsBase):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
 
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_highlight=False
-        )
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertTrue(should_be_sent)
 
@@ -422,10 +422,7 @@ class NotificationShouldBeSentTests(TestsBase):
         BUFFER = 'buffer'
         set_buffer_string(BUFFER, 'localvar_type', 'private')
 
-        should_be_sent = self.notification_should_be_sent(
-            buffer=BUFFER,
-            is_highlight=False
-        )
+        should_be_sent = self.notification_should_be_sent(buffer=BUFFER)
 
         self.assertFalse(should_be_sent)
 
