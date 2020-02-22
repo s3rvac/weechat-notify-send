@@ -282,10 +282,6 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
         if not notify_on_filtered_messages():
             return False
 
-    if buffer == weechat.current_buffer():
-        if not notify_for_current_buffer():
-            return False
-
     if is_away(buffer):
         if not notify_when_away():
             return False
@@ -298,6 +294,10 @@ def notification_should_be_sent_disregarding_time(buffer, tags, nick,
 
     if ignore_notifications_from_buffer(buffer):
         return False
+
+    if buffer == weechat.current_buffer():
+        if not notify_for_current_buffer():
+            return False
 
     if is_private_message(buffer):
         return notify_on_private_messages()
