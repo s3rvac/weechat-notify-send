@@ -52,7 +52,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 * `notify_when_away`: Send also notifications when away. Default: `on`.
 * `notify_for_current_buffer`: Send also notifications for the currently active
   buffer. Default: `on`.
-* `notify_on_all_messages_in_current_buffer`: Send a notification for all
+* `notify_on_all_messages_in_current_buffer`: Send a notification on all
   messages in the currently active buffer. Default: `off`.
 * `notify_on_all_messages_in_buffers`: A comma-separated list of buffers for
   which you want to receive notifications on all messages that appear in them.

@@ -5,7 +5,7 @@ dev
 ---
 
 * Added a new option: `notify_on_all_messages_in_current_buffer`. When set to
-  `on`, you will receive a notification for all messages in the currently
+  `on`, you will receive a notification on all messages in the currently
   active buffer
   ([#22](https://github.com/s3rvac/weechat-notify-send/issues/22)).
 * Added a new option: `hide_messages_in_buffers_that_match`. It is a
