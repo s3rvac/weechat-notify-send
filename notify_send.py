@@ -135,7 +135,7 @@ OPTIONS = {
         'notifications should be shown.'
     ),
     'ignore_nicks': (
-        '',
+        '-,--,-->',
         'A comma-separated list of nicks from which no notifications should '
         'be shown.'
     ),

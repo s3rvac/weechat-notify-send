@@ -81,7 +81,7 @@ plugins.var.python.notify_send.XXX YYY` or by using the
 * `ignore_buffers_starting_with`: A comma-separated list of buffer prefixes
   from which no notifications should be shown. Default: `''`.
 * `ignore_nicks`: A comma-separated list of nicks from which no notifications
-  should be shown. Default: `''`.
+  should be shown. Default: `'-,--,-->'`.
 * `ignore_nicks_starting_with`: A comma-separated list of nick prefixes from
   which no notifications should be shown. Default: `''`.
 * `hide_messages_in_buffers_that_match`: A comma-separated list of regex
