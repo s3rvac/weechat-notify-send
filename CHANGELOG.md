@@ -4,6 +4,11 @@ Changelog
 dev
 ---
 
+-
+
+0.9 (2020-03-15)
+----------------
+
 * Changed the default value of the `ignore_nicks` option from `''` to
   `'-,--,-->'`. This will prevent notifications for messages from nicks `-`,
   `--`, and `-->`, which is usually just noise
