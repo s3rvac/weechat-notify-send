@@ -9,10 +9,6 @@ dev
 0.9 (2020-03-15)
 ----------------
 
-* Changed the default value of the `ignore_nicks` option from `''` to
-  `'-,--,-->'`. This will prevent notifications for messages from nicks `-`,
-  `--`, and `-->`, which is usually just noise
-  ([#23](https://github.com/s3rvac/weechat-notify-send/issues/23)).
 * Added a new option: `notify_on_all_messages_in_current_buffer`. When set to
   `on`, you will receive a notification on all messages in the currently
   active buffer
@@ -25,6 +21,10 @@ dev
   entry for WeeChat. This enables `notify-send` to focus WeeChat upon clicking
   on a notification
   ([#14](https://github.com/s3rvac/weechat-notify-send/issues/14)).
+* Changed the default value of the `ignore_nicks` option from `''` to
+  `'-,--,-->'`. This will prevent notifications for messages from nicks `-`,
+  `--`, and `-->`, which is usually just noise
+  ([#23](https://github.com/s3rvac/weechat-notify-send/issues/23)).
 * Dropped support for Python 3.4 ([it is
   EOL](https://www.python.org/downloads/release/python-3410/)). When using
   Python 3, at least Python 3.5 is required.
