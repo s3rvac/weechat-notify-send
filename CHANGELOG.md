@@ -4,7 +4,8 @@ Changelog
 dev
 ---
 
--
+- `notify-send` is now called with `--category im.received`
+  ([#27](https://github.com/s3rvac/weechat-notify-send/issues/27)).
 
 0.9 (2020-03-15)
 ----------------

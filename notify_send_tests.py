@@ -1094,6 +1094,7 @@ class SendNotificationTests(TestsBase):
                 '--expire-time', '5000',
                 '--hint', 'int:transient:1',
                 '--urgency', 'normal',
+                '--category', 'im.received',
                 '--',
                 'source',
                 'message'

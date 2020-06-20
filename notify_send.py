@@ -710,6 +710,9 @@ def send_notification(notification):
         notify_cmd += ['--hint', 'int:transient:1']
     if notification.urgency:
         notify_cmd += ['--urgency', notification.urgency]
+    # The "im.received" category means "A received instant message
+    # notification".
+    notify_cmd += ['--category', 'im.received']
     # We need to add '--' before the source and message to ensure that
     # notify-send considers the remaining parameters as the source and the
     # message. This prevents errors when a source or message starts with '--'.
