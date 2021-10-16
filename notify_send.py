@@ -582,7 +582,7 @@ def buffer_patterns_to_hide_messages():
 
 
 def hide_message_in_buffer(buffer):
-    """Should we hide messages in the given buffer?"""
+    """Should messages in the given buffer be hidden?"""
     buffer_names = names_for_buffer(buffer)
 
     for pattern in buffer_patterns_to_hide_messages():
