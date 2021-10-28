@@ -12,3 +12,6 @@ exclude_lines =
 
     # Code that is run only when a script is executed directly.
     if __name__ == .__main__.:
+
+[run]
+relative_files = True
