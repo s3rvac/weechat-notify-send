@@ -1,7 +1,7 @@
 weechat-notify-send
 ===================
 
-[![Build Status](https://travis-ci.com/s3rvac/weechat-notify-send.svg?branch=master)](https://travis-ci.com/s3rvac/weechat-notify-send)
+[![Build Status](https://github.com/s3rvac/weechat-notify-send/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/s3rvac/weechat-notify-send/actions/workflows/tests.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/s3rvac/weechat-notify-send/badge.svg?branch=master)](https://coveralls.io/github/s3rvac/weechat-notify-send?branch=master)
 
 A [WeeChat](https://weechat.org/) script that sends highlight and message
