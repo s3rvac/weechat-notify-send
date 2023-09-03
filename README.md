@@ -18,7 +18,7 @@ notification system as well as on the used icon.
 Requirements
 ------------
 
-* Python 2.7 or Python >= 3.7 (either CPython or PyPy)
+* Python 2.7 or Python >= 3.8 (either CPython or PyPy)
 * `notify-send` provided by [libnotify](https://developer.gnome.org/libnotify/)
     * Debian: [libnotify-bin](https://packages.debian.org/bullseye/libnotify-bin)
     * Ubuntu: [libnotify-bin](https://packages.ubuntu.com/focal/libnotify-bin)
