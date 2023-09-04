@@ -19,6 +19,8 @@ Requirements
 ------------
 
 * Python 2.7 or Python >= 3.8 (either CPython or PyPy)
+    * Note: The script might work even in older Python 3 releases, but this is
+      not guaranteed.
 * `notify-send` provided by [libnotify](https://developer.gnome.org/libnotify/)
     * Debian: [libnotify-bin](https://packages.debian.org/bullseye/libnotify-bin)
     * Ubuntu: [libnotify-bin](https://packages.ubuntu.com/focal/libnotify-bin)
