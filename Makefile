@@ -18,18 +18,12 @@ help:
 clean:
 	@find . -name '__pycache__' -exec rm -rf {} +
 	@find . -name '*.py[co]' -exec rm -f {} +
-	@rm -rf .coverage coverage
 
 lint:
 	@flake8 --ignore=E402,W504 --max-line-length=100 notify_send.py notify_send_tests.py
 
 tests:
-	@nosetests notify_send_tests.py
+	@pytest notify_send_tests.py
 
 tests-coverage:
-	@nosetests notify_send_tests.py \
-		--with-coverage \
-		--cover-package notify_send \
-		--cover-erase \
-		--cover-html \
-		--cover-html-dir coverage
+	@pytest --cov=notify_send notify_send_tests.py

@@ -2,6 +2,5 @@
 __pycache__
 *.py[co]
 
-# Code coverage settings and reports
+# Code coverage
 /.coverage
-/coverage
