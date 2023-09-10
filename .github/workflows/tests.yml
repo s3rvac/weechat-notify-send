@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-10.15, windows-2019]
+        os: [ubuntu-22.04, macos-12, windows-2022]
         python-version: [3.8, 3.11, pypy-2.7, pypy-3.8]
     steps:
       - uses: actions/checkout@v2
@@ -23,5 +23,5 @@ jobs:
       - name: Run linting checks
         run: flake8 --ignore=E402,W504 --max-line-length=100 notify_send.py notify_send_tests.py
       - name: Report coveralls status
-        if: matrix.os == 'ubuntu-20.04' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.11'
         uses: AndreMiras/coveralls-python-action@v20201129
