@@ -6,7 +6,7 @@ dev
 
 - `notify-send` is now called with `--category im.received`
   ([#27](https://github.com/s3rvac/weechat-notify-send/issues/27)).
-* DEL: Dropped official support for Python 3.5, 3.6, and 3.7. as [they are
+* Dropped official support for Python 3.5, 3.6, and 3.7. as [they are
   EOL](https://endoflife.date/python).
 
 0.9 (2020-03-15)
