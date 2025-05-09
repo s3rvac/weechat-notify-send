@@ -4,6 +4,9 @@ Changelog
 dev
 ---
 
+* Dropped official support for Python 3.8 as [it is
+  EOL](https://endoflife.date/python).
+
 0.10 (2023-09-10)
 ----------------
 
