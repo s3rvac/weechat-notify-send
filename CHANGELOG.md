@@ -4,6 +4,8 @@ Changelog
 dev
 ---
 
+* Added a new option: `replace_buffer_notifications`. When set to `on`,
+  notifications sent to a buffer replace any existing notification.
 * Dropped official support for Python 3.8 as [it is
   EOL](https://endoflife.date/python).
 

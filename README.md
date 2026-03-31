@@ -106,6 +106,9 @@ plugins.var.python.notify_send.XXX YYY` or by using the
   notification bar. Set it to `off` to keep the notification. Default: `on`.
 * `urgency`: Notification urgency (`low`, `normal`, `critical`). Default:
   `normal`.
+* `replace_buffer_notifications`: Instead of generating more than one
+  notification per buffer, replace each buffer's previous one with the
+  latest notification. Default: `off`.
 
 License
 -------
