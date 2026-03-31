@@ -4,6 +4,9 @@ Changelog
 dev
 ---
 
+* Added new option: `auto_close_prior_buffer_notification`. When set
+  to `on`, printing a message in a buffer automatically closes any prior
+  notification associated with that buffer.
 * Added a new option: `replace_buffer_notifications`. When set to `on`,
   notifications sent to a buffer replace any existing notification.
 * Dropped official support for Python 3.8 as [it is

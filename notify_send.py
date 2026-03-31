@@ -190,6 +190,11 @@ OPTIONS = {
         'off',
         'Instead of generating more than one notification per buffer, '
         'replace each buffer\'s previous one with the latest notification.'
+    ),
+    'auto_close_prior_buffer_notification': (
+        'off',
+        'When printing a message in a buffer, automatically close any prior '
+        'notification associated with that buffer.'
     )
 }
 
@@ -279,6 +284,9 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
     if notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight, message):
         notification = prepare_notification(buffer, nick, message)
         send_notification(buffer, notification)
+    elif (i_am_author_of_message(buffer, nick) and
+          auto_close_prior_notification_for_buffer(buffer)):
+        close_notification(buffer)
 
     return weechat.WEECHAT_RC_OK
 
@@ -620,6 +628,13 @@ def replace_notification_for_buffer(buffer):
     return weechat.config_get_plugin('replace_buffer_notifications') == 'on'
 
 
+def auto_close_prior_notification_for_buffer(buffer):
+    """Should a prior notification associated with this buffer be automatically
+    closed?
+    """
+    return weechat.config_get_plugin('auto_close_prior_buffer_notification') == 'on'
+
+
 def prepare_notification(buffer, nick, message):
     """Prepares a notification from the given data."""
     if is_private_message(buffer):
@@ -780,6 +795,29 @@ def send_notification(buffer, notification):
             'Ensure that you have notify-send installed in your system.',
         )
         print(error_message, file=sys.stderr)
+
+
+def close_notification(buffer):
+    """Closes the buffer's last notification."""
+    notification_id = buffer_get_notification_id(buffer)
+
+    # Nothing to do unless there's a non-zero notification_id.
+    if notification_id == '0':
+        return
+
+    # Close the last notification by replacing it with a blank one that
+    # quickly times out.
+    notification = Notification(
+        source=' ',  # single space (not '')
+        message='',
+        icon=weechat.config_get_plugin('icon'),
+        desktop_entry=weechat.config_get_plugin('desktop_entry'),
+        timeout='5',  # 5ms
+        transient=should_notifications_be_transient(),
+        urgency=weechat.config_get_plugin('urgency'),
+        replace_id=notification_id,
+    )
+    send_notification(buffer, notification)
 
 
 if __name__ == '__main__':

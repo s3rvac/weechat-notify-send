@@ -57,6 +57,7 @@ from notify_send import notify_on_all_messages_in_buffer
 from notify_send import notify_on_messages_that_match
 from notify_send import prepare_notification
 from notify_send import send_notification
+from notify_send import close_notification
 from notify_send import shorten_message
 
 
@@ -145,6 +146,7 @@ class TestsBase(unittest.TestCase):
         set_config_option('transient', 'on')
         set_config_option('urgency', '')
         set_config_option('replace_buffer_notifications', 'off')
+        set_config_option('auto_close_prior_buffer_notification', 'off')
 
         # Mimic the behavior of weechat.buffer_get_string() by returning the
         # empty string by default.
@@ -222,6 +224,16 @@ class MessagePrintedCallbackTests(TestsBase):
         self.send_notification = patcher.start()
         self.addCleanup(patcher.stop)
 
+        # Mock i_am_author_of_message().
+        patcher = mock.patch('notify_send.i_am_author_of_message')
+        self.i_am_author_of_message = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Mock close_notification().
+        patcher = mock.patch('notify_send.close_notification')
+        self.close_notification = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def message_printed_callback(self, data=None, buffer='buffer', date=None,
                                  tags='', is_displayed='1', is_highlight='0',
                                  prefix='prefix', message='message'):
@@ -242,6 +254,42 @@ class MessagePrintedCallbackTests(TestsBase):
 
         rc = self.message_printed_callback()
 
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_closes_notification_when_auto_close_prior_buffer_notification_is_on(self):
+        self.notification_should_be_sent.return_value = False
+        self.i_am_author_of_message.return_value = True
+        set_config_option('auto_close_prior_buffer_notification', 'on')
+
+        rc = self.message_printed_callback()
+
+        self.assertTrue(self.close_notification.called)
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_does_not_close_notification_when_auto_close_prior_buffer_notification_is_off(self):
+        self.notification_should_be_sent.return_value = False
+        self.i_am_author_of_message.return_value = True
+        set_config_option('auto_close_prior_buffer_notification', 'off')
+
+        rc = self.message_printed_callback()
+
+        self.assertFalse(self.close_notification.called)
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_does_not_close_notification_when_i_am_not_author(self):
+        self.notification_should_be_sent.return_value = False
+        self.i_am_author_of_message.return_value = False
+        set_config_option('auto_close_prior_buffer_notification', 'on')
+
+        rc = self.message_printed_callback()
+
+        self.assertFalse(self.close_notification.called)
         self.assertTrue(self.notification_should_be_sent.called)
         self.assertFalse(self.send_notification.called)
         self.assertEqual(rc, weechat.WEECHAT_RC_OK)
@@ -1239,4 +1287,76 @@ class SendNotificationTests(TestsBase):
             BUFFER,
             'localvar_set_notify_send_notification_id',
             '0'
+        )
+
+
+class CloseNotificationTests(TestsBase):
+    """Tests for close_notification()."""
+
+    def setUp(self):
+        super(CloseNotificationTests, self).setUp()
+
+        # Mock subprocess.
+        patcher = mock.patch('notify_send.subprocess')
+        self.subprocess = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Mock print.
+        if sys.version_info.major == 3:
+            patcher = mock.patch('builtins.print')
+        else:
+            patcher = mock.patch('notify_send.print')
+        self.print_mock = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_calls_correct_command_when_notification_should_be_closed(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '5678')
+
+        close_notification(BUFFER)
+
+        self.subprocess.check_output.assert_called_once_with(
+            [
+                'notify-send',
+                '--print-id',
+                '--app-name', 'weechat',
+                '--expire-time', '5',
+                '--hint', 'int:transient:1',
+                '--replace-id', '5678',
+                '--category', 'im.received',
+                '--',
+                ' ',
+                ''
+            ],
+            stderr=self.subprocess.STDOUT,
+            universal_newlines=True
+        )
+
+    def test_does_not_close_notification_when_notification_id_is_zero(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '0')
+
+        close_notification(BUFFER)
+
+        self.subprocess.check_output.assert_not_called()
+
+    def test_does_not_close_notification_when_notification_id_is_not_set(self):
+        BUFFER = 'buffer'
+
+        close_notification(BUFFER)
+
+        self.subprocess.check_output.assert_not_called()
+
+    def test_prints_error_message_when_closing_notification_fails(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '5678')
+        self.subprocess.check_output.side_effect = OSError(
+            'No such file or directory: notify-send'
+        )
+
+        close_notification(BUFFER)
+
+        self.assertIn(
+            'OSError: No such file or directory: notify-send',
+            self.print_mock.call_args[0][0]
         )
