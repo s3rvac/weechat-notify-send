@@ -7,7 +7,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-14, windows-2022]
-        python-version: [3.9, 3.11, pypy-2.7, pypy-3.9]
+        python-version: [3.9, 3.14, pypy-2.7, pypy-3.10]
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
@@ -23,5 +23,5 @@ jobs:
       - name: Run linting checks
         run: flake8 --ignore=E402,W504 --max-line-length=100 notify_send.py notify_send_tests.py
       - name: Report coveralls status
-        if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.14'
         uses: AndreMiras/coveralls-python-action@develop
