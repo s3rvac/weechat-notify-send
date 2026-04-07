@@ -26,7 +26,6 @@
 # SOFTWARE.
 #
 
-import os
 import sys
 import unittest
 
@@ -58,13 +57,15 @@ from notify_send import notify_on_all_messages_in_buffer
 from notify_send import notify_on_messages_that_match
 from notify_send import prepare_notification
 from notify_send import send_notification
+from notify_send import close_notification
 from notify_send import shorten_message
 
 
 def new_notification(source='source', message='message', icon='icon.png',
                      desktop_entry='weechat', timeout=5000, transient=True,
-                     urgency='normal'):
-    return Notification(source, message, icon, desktop_entry, timeout, transient, urgency)
+                     urgency='normal', replace_id='0'):
+    return Notification(source, message, icon,
+                        desktop_entry, timeout, transient, urgency, replace_id)
 
 
 def set_config_option(option, value):
@@ -144,6 +145,8 @@ class TestsBase(unittest.TestCase):
         set_config_option('timeout', '0')
         set_config_option('transient', 'on')
         set_config_option('urgency', '')
+        set_config_option('replace_buffer_notifications', 'off')
+        set_config_option('auto_close_prior_buffer_notification', 'off')
 
         # Mimic the behavior of weechat.buffer_get_string() by returning the
         # empty string by default.
@@ -221,6 +224,16 @@ class MessagePrintedCallbackTests(TestsBase):
         self.send_notification = patcher.start()
         self.addCleanup(patcher.stop)
 
+        # Mock i_am_author_of_message().
+        patcher = mock.patch('notify_send.i_am_author_of_message')
+        self.i_am_author_of_message = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Mock close_notification().
+        patcher = mock.patch('notify_send.close_notification')
+        self.close_notification = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def message_printed_callback(self, data=None, buffer='buffer', date=None,
                                  tags='', is_displayed='1', is_highlight='0',
                                  prefix='prefix', message='message'):
@@ -241,6 +254,42 @@ class MessagePrintedCallbackTests(TestsBase):
 
         rc = self.message_printed_callback()
 
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_closes_notification_when_auto_close_prior_buffer_notification_is_on(self):
+        self.notification_should_be_sent.return_value = False
+        self.i_am_author_of_message.return_value = True
+        set_config_option('auto_close_prior_buffer_notification', 'on')
+
+        rc = self.message_printed_callback()
+
+        self.assertTrue(self.close_notification.called)
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_does_not_close_notification_when_auto_close_prior_buffer_notification_is_off(self):
+        self.notification_should_be_sent.return_value = False
+        self.i_am_author_of_message.return_value = True
+        set_config_option('auto_close_prior_buffer_notification', 'off')
+
+        rc = self.message_printed_callback()
+
+        self.assertFalse(self.close_notification.called)
+        self.assertTrue(self.notification_should_be_sent.called)
+        self.assertFalse(self.send_notification.called)
+        self.assertEqual(rc, weechat.WEECHAT_RC_OK)
+
+    def test_does_not_close_notification_when_i_am_not_author(self):
+        self.notification_should_be_sent.return_value = False
+        self.i_am_author_of_message.return_value = False
+        set_config_option('auto_close_prior_buffer_notification', 'on')
+
+        rc = self.message_printed_callback()
+
+        self.assertFalse(self.close_notification.called)
         self.assertTrue(self.notification_should_be_sent.called)
         self.assertFalse(self.send_notification.called)
         self.assertEqual(rc, weechat.WEECHAT_RC_OK)
@@ -986,6 +1035,32 @@ class PrepareNotificationTests(TestsBase):
 
         self.assertEqual(notification.message, 'hello')
 
+    def test_notification_has_correct_replace_id_when_replace_buffer_notifications_on(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '5555')
+        set_config_option('replace_buffer_notifications', 'on')
+
+        notification = self.prepare_notification(BUFFER, message='hello')
+
+        self.assertEqual(notification.replace_id, '5555')
+
+    def test_notification_has_correct_replace_id_when_replace_buffer_notifications_off(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '5555')
+        set_config_option('replace_buffer_notifications', 'off')
+
+        notification = self.prepare_notification(BUFFER, message='hello')
+
+        self.assertEqual(notification.replace_id, '0')
+
+    def test_notification_has_correct_replace_id_when_buffer_var_not_set(self):
+        BUFFER = 'buffer'
+        set_config_option('replace_buffer_notifications', 'on')
+
+        notification = self.prepare_notification(BUFFER, message='hello')
+
+        self.assertEqual(notification.replace_id, '0')
+
 
 class NickSeparatorTests(TestsBase):
     """Tests for nick_separator()."""
@@ -1069,6 +1144,7 @@ class SendNotificationTests(TestsBase):
         self.addCleanup(patcher.stop)
 
     def test_calls_correct_command_when_all_notification_parameters_are_set(self):
+        BUFFER = 'buffer'
         notification = new_notification(
             source='source',
             message='message',
@@ -1076,89 +1152,211 @@ class SendNotificationTests(TestsBase):
             desktop_entry='weechat',
             timeout=5000,
             transient=True,
-            urgency='normal'
+            urgency='normal',
+            replace_id='666'
         )
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        class AnyDevNullStream:
-            def __eq__(self, other):
-                return other.name == os.devnull
-
-        self.subprocess.check_call.assert_called_once_with(
+        self.subprocess.check_output.assert_called_once_with(
             [
                 'notify-send',
+                '--print-id',
                 '--app-name', 'weechat',
                 '--icon', 'icon.png',
                 '--hint', 'string:desktop-entry:weechat',
                 '--expire-time', '5000',
                 '--hint', 'int:transient:1',
                 '--urgency', 'normal',
+                '--replace-id', '666',
                 '--category', 'im.received',
                 '--',
                 'source',
                 'message'
             ],
             stderr=self.subprocess.STDOUT,
-            stdout=AnyDevNullStream()
+            universal_newlines=True
         )
 
     def test_source_is_set_to_hyphen_when_source_is_empty(self):
+        BUFFER = 'buffer'
         notification = new_notification(source='')
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
         self.assertIn('-', notify_cmd)
 
     def test_does_not_include_icon_in_command_when_icon_is_not_set(self):
+        BUFFER = 'buffer'
         notification = new_notification(icon='')
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
         self.assertNotIn('--icon', notify_cmd)
 
     def test_does_not_include_desktop_entry_in_command_when_it_is_not_set(self):
+        BUFFER = 'buffer'
         notification = new_notification(desktop_entry='')
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
         self.assertNotIn('desktop-entry', notify_cmd)
 
     def test_does_not_include_expire_time_in_command_when_timeout_is_not_set(self):
+        BUFFER = 'buffer'
         notification = new_notification(timeout='')
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
         self.assertNotIn('--expire-time', notify_cmd)
 
     def test_does_not_include_transient_hint_in_command_when_transient_is_off(self):
+        BUFFER = 'buffer'
         notification = new_notification(transient=False)
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
         self.assertNotIn('int:transient:1', notify_cmd)
 
     def test_does_not_include_urgency_in_command_when_urgency_is_not_set(self):
+        BUFFER = 'buffer'
         notification = new_notification(urgency='')
 
-        send_notification(notification)
+        send_notification(BUFFER, notification)
 
-        notify_cmd = self.subprocess.check_call.call_args[0][0]
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
         self.assertNotIn('--urgency', notify_cmd)
 
+    def test_does_not_include_replace_id_in_command_when_replace_id_is_zero(self):
+        BUFFER = 'buffer'
+        notification = new_notification(replace_id='0')
+
+        send_notification(BUFFER, notification)
+
+        notify_cmd = self.subprocess.check_output.call_args[0][0]
+        self.assertNotIn('--replace-id', notify_cmd)
+
     def test_prints_error_message_when_notification_sending_fails(self):
-        self.subprocess.check_call.side_effect = OSError(
+        BUFFER = 'buffer'
+        self.subprocess.check_output.side_effect = OSError(
             'No such file or directory: notify-send'
         )
 
-        send_notification(new_notification())
+        send_notification(BUFFER, new_notification())
 
         self.assertIn(
             'OSError: No such file or directory',
+            self.print_mock.call_args[0][0]
+        )
+
+    def test_notification_id_is_saved_when_replace_id_differs(self):
+        BUFFER = 'buffer'
+        notification = new_notification(replace_id='1234')
+        self.subprocess.check_output.return_value = '4321\n'
+
+        send_notification(BUFFER, notification)
+
+        weechat.buffer_set.assert_called_once_with(
+            BUFFER,
+            'localvar_set_notify_send_notification_id',
+            '4321'
+        )
+
+    def test_notification_id_is_not_saved_when_replace_id_matches(self):
+        BUFFER = 'buffer'
+        notification = new_notification(replace_id='1234')
+        self.subprocess.check_output.return_value = '1234\n'
+
+        send_notification(BUFFER, notification)
+
+        weechat.buffer_set.assert_not_called()
+
+    def test_notification_id_is_reset_when_an_error_occurs(self):
+        BUFFER = 'buffer'
+        notification = new_notification(replace_id='1234')
+        self.subprocess.check_output.return_value = '1234xxx\n'
+
+        send_notification(BUFFER, notification)
+
+        weechat.buffer_set.assert_called_once_with(
+            BUFFER,
+            'localvar_set_notify_send_notification_id',
+            '0'
+        )
+
+
+class CloseNotificationTests(TestsBase):
+    """Tests for close_notification()."""
+
+    def setUp(self):
+        super(CloseNotificationTests, self).setUp()
+
+        # Mock subprocess.
+        patcher = mock.patch('notify_send.subprocess')
+        self.subprocess = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Mock print.
+        if sys.version_info.major == 3:
+            patcher = mock.patch('builtins.print')
+        else:
+            patcher = mock.patch('notify_send.print')
+        self.print_mock = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_calls_correct_command_when_notification_should_be_closed(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '5678')
+
+        close_notification(BUFFER)
+
+        self.subprocess.check_output.assert_called_once_with(
+            [
+                'notify-send',
+                '--print-id',
+                '--app-name', 'weechat',
+                '--expire-time', '5',
+                '--hint', 'int:transient:1',
+                '--replace-id', '5678',
+                '--category', 'im.received',
+                '--',
+                ' ',
+                ''
+            ],
+            stderr=self.subprocess.STDOUT,
+            universal_newlines=True
+        )
+
+    def test_does_not_close_notification_when_notification_id_is_zero(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '0')
+
+        close_notification(BUFFER)
+
+        self.subprocess.check_output.assert_not_called()
+
+    def test_does_not_close_notification_when_notification_id_is_not_set(self):
+        BUFFER = 'buffer'
+
+        close_notification(BUFFER)
+
+        self.subprocess.check_output.assert_not_called()
+
+    def test_prints_error_message_when_closing_notification_fails(self):
+        BUFFER = 'buffer'
+        set_buffer_string(BUFFER, 'localvar_notify_send_notification_id', '5678')
+        self.subprocess.check_output.side_effect = OSError(
+            'No such file or directory: notify-send'
+        )
+
+        close_notification(BUFFER)
+
+        self.assertIn(
+            'OSError: No such file or directory: notify-send',
             self.print_mock.call_args[0][0]
         )

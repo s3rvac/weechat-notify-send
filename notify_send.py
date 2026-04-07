@@ -29,7 +29,6 @@
 
 from __future__ import print_function
 
-import os
 import re
 import subprocess
 import sys
@@ -186,14 +185,27 @@ OPTIONS = {
     'urgency': (
         'normal',
         'Urgency (low, normal, critical).'
+    ),
+    'replace_buffer_notifications': (
+        'off',
+        'Instead of generating more than one notification per buffer, '
+        'replace each buffer\'s previous one with the latest notification.'
+    ),
+    'auto_close_prior_buffer_notification': (
+        'off',
+        'When printing a message in a buffer, automatically close any prior '
+        'notification associated with that buffer.'
     )
 }
+
+NOTIFICATION_ID_VAR = 'notify_send_notification_id'
 
 
 class Notification(object):
     """A representation of a notification."""
 
-    def __init__(self, source, message, icon, desktop_entry, timeout, transient, urgency):
+    def __init__(self, source, message, icon,
+                 desktop_entry, timeout, transient, urgency, replace_id):
         self.source = source
         self.message = message
         self.icon = icon
@@ -201,6 +213,21 @@ class Notification(object):
         self.timeout = timeout
         self.transient = transient
         self.urgency = urgency
+        self.replace_id = replace_id
+
+
+def buffer_get_notification_id(buffer):
+    """Returns the ID of the last notification sent for a buffer,
+    or '0' if none have been sent.
+    """
+    property = 'localvar_' + NOTIFICATION_ID_VAR
+    return weechat.buffer_get_string(buffer, property) or '0'
+
+
+def buffer_set_notification_id(buffer, notification_id):
+    """Saves the notification ID in a local buffer variable."""
+    property = 'localvar_set_' + NOTIFICATION_ID_VAR
+    weechat.buffer_set(buffer, property, notification_id)
 
 
 def default_value_of(option):
@@ -256,7 +283,10 @@ def message_printed_callback(data, buffer, date, tags, is_displayed,
 
     if notification_should_be_sent(buffer, tags, nick, is_displayed, is_highlight, message):
         notification = prepare_notification(buffer, nick, message)
-        send_notification(notification)
+        send_notification(buffer, notification)
+    elif (i_am_author_of_message(buffer, nick) and
+          auto_close_prior_notification_for_buffer(buffer)):
+        close_notification(buffer)
 
     return weechat.WEECHAT_RC_OK
 
@@ -593,6 +623,18 @@ def hide_message_in_buffer(buffer):
     return False
 
 
+def replace_notification_for_buffer(buffer):
+    """Should a new notification replace a buffer's previous notification?"""
+    return weechat.config_get_plugin('replace_buffer_notifications') == 'on'
+
+
+def auto_close_prior_notification_for_buffer(buffer):
+    """Should a prior notification associated with this buffer be automatically
+    closed?
+    """
+    return weechat.config_get_plugin('auto_close_prior_buffer_notification') == 'on'
+
+
 def prepare_notification(buffer, nick, message):
     """Prepares a notification from the given data."""
     if is_private_message(buffer):
@@ -621,7 +663,14 @@ def prepare_notification(buffer, nick, message):
     transient = should_notifications_be_transient()
     urgency = weechat.config_get_plugin('urgency')
 
-    return Notification(source, message, icon, desktop_entry, timeout, transient, urgency)
+    if replace_notification_for_buffer(buffer):
+        replace_id = buffer_get_notification_id(buffer)
+    else:
+        # Specify '0' to generate a new notification.
+        replace_id = '0'
+
+    return Notification(source, message, icon,
+                        desktop_entry, timeout, transient, urgency, replace_id)
 
 
 def should_notifications_be_transient():
@@ -697,9 +746,9 @@ def escape_slashes(message):
     return message.replace('\\', r'\\')
 
 
-def send_notification(notification):
+def send_notification(buffer, notification):
     """Sends the given notification to the user."""
-    notify_cmd = ['notify-send', '--app-name', 'weechat']
+    notify_cmd = ['notify-send', '--print-id', '--app-name', 'weechat']
     if notification.icon:
         notify_cmd += ['--icon', notification.icon]
     if notification.desktop_entry:
@@ -710,6 +759,8 @@ def send_notification(notification):
         notify_cmd += ['--hint', 'int:transient:1']
     if notification.urgency:
         notify_cmd += ['--urgency', notification.urgency]
+    if notification.replace_id != '0':
+        notify_cmd += ['--replace-id', notification.replace_id]
     # The "im.received" category means "A received instant message
     # notification".
     notify_cmd += ['--category', 'im.received']
@@ -724,25 +775,49 @@ def send_notification(notification):
         notification.message
     ]
 
-    # Prevent notify-send from messing up the WeeChat screen when occasionally
-    # emitting assertion messages by redirecting the output to /dev/null (users
-    # would need to run /redraw to fix the screen).
-    # In Python < 3.3, there is no subprocess.DEVNULL, so we have to use a
-    # workaround.
-    with open(os.devnull, 'wb') as devnull:
+    try:
+        output = subprocess.check_output(notify_cmd,
+                                         stderr=subprocess.STDOUT,
+                                         universal_newlines=True)
+
+        notification_id = output.strip('\n')
         try:
-            subprocess.check_call(
-                notify_cmd,
-                stderr=subprocess.STDOUT,
-                stdout=devnull,
-            )
-        except Exception as ex:
-            error_message = '{} (reason: {!r}). {}'.format(
-                'Failed to send the notification via notify-send',
-                '{}: {}'.format(ex.__class__.__name__, ex),
-                'Ensure that you have notify-send installed in your system.',
-            )
-            print(error_message, file=sys.stderr)
+            _ = int(notification_id)
+        except ValueError:
+            notification_id = '0'
+        if notification_id != notification.replace_id:
+            buffer_set_notification_id(buffer, notification_id)
+
+    except Exception as ex:
+        error_message = '{} (reason: {!r}). {}'.format(
+            'Failed to send the notification via notify-send',
+            '{}: {}'.format(ex.__class__.__name__, ex),
+            'Ensure that you have notify-send installed in your system.',
+        )
+        print(error_message, file=sys.stderr)
+
+
+def close_notification(buffer):
+    """Closes the buffer's last notification."""
+    notification_id = buffer_get_notification_id(buffer)
+
+    # Nothing to do unless there's a non-zero notification_id.
+    if notification_id == '0':
+        return
+
+    # Close the last notification by replacing it with a blank one that
+    # quickly times out.
+    notification = Notification(
+        source=' ',  # single space (not '')
+        message='',
+        icon=weechat.config_get_plugin('icon'),
+        desktop_entry=weechat.config_get_plugin('desktop_entry'),
+        timeout='5',  # 5ms
+        transient=should_notifications_be_transient(),
+        urgency=weechat.config_get_plugin('urgency'),
+        replace_id=notification_id,
+    )
+    send_notification(buffer, notification)
 
 
 if __name__ == '__main__':
