@@ -15,7 +15,7 @@ dev
   EOL](https://endoflife.date/python).
 
 0.10 (2023-09-10)
-----------------
+-----------------
 
 * `notify-send` is now called with `--category im.received`
   ([#27](https://github.com/s3rvac/weechat-notify-send/issues/27)).
