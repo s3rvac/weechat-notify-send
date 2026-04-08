@@ -29,10 +29,7 @@
 import sys
 import unittest
 
-try:
-    from unittest import mock  # Python 3
-except ImportError:
-    import mock  # Python 2
+from unittest import mock
 
 # We need to mock the 'weechat' import because the tests do not run under
 # WeeChat, so the import would fail.
@@ -1136,10 +1133,7 @@ class SendNotificationTests(TestsBase):
         self.addCleanup(patcher.stop)
 
         # Mock print.
-        if sys.version_info.major == 3:
-            patcher = mock.patch('builtins.print')
-        else:
-            patcher = mock.patch('notify_send.print')
+        patcher = mock.patch('builtins.print')
         self.print_mock = patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -1302,10 +1296,7 @@ class CloseNotificationTests(TestsBase):
         self.addCleanup(patcher.stop)
 
         # Mock print.
-        if sys.version_info.major == 3:
-            patcher = mock.patch('builtins.print')
-        else:
-            patcher = mock.patch('notify_send.print')
+        patcher = mock.patch('builtins.print')
         self.print_mock = patcher.start()
         self.addCleanup(patcher.stop)
 
