@@ -11,7 +11,7 @@ dev
 * Added a new option: `replace_buffer_notifications`
   ([#33](https://github.com/s3rvac/weechat-notify-send/pull/33)). When set to
   `on`, notifications sent to a buffer replace any existing notification.
-* Dropped official support for Python 3.8 as [it is
+* Dropped official support for Python 3.8 and 3.9 as [they are
   EOL](https://endoflife.date/python).
 
 0.10 (2023-09-10)
