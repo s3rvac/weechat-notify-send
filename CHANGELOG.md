@@ -4,11 +4,13 @@ Changelog
 dev
 ---
 
-* Added new option: `auto_close_prior_buffer_notification`. When set
-  to `on`, printing a message in a buffer automatically closes any prior
+* Added new option: `auto_close_prior_buffer_notification`
+  ([#33](https://github.com/s3rvac/weechat-notify-send/pull/33)). When set to
+  `on`, printing a message in a buffer automatically closes any prior
   notification associated with that buffer.
-* Added a new option: `replace_buffer_notifications`. When set to `on`,
-  notifications sent to a buffer replace any existing notification.
+* Added a new option: `replace_buffer_notifications`
+  ([#33](https://github.com/s3rvac/weechat-notify-send/pull/33)). When set to
+  `on`, notifications sent to a buffer replace any existing notification.
 * Dropped official support for Python 3.8 as [it is
   EOL](https://endoflife.date/python).
 
