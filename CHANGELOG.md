@@ -4,7 +4,10 @@ Changelog
 dev
 ---
 
-* Added new option: `auto_close_prior_buffer_notification`
+0.11 (2026-04-08)
+-----------------
+
+* Added a new option: `auto_close_prior_buffer_notification`
   ([#33](https://github.com/s3rvac/weechat-notify-send/pull/33)). When set to
   `on`, printing a message in a buffer automatically closes any prior
   notification associated with that buffer.
